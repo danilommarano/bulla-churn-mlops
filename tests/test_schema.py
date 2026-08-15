@@ -32,6 +32,7 @@ def test_valid_frame_passes():
     df = pd.DataFrame([_valid_row()])
     out = validate_raw(df)
     assert len(out) == 1
+    assert list(out.columns) == list(df.columns)
 
 
 def test_unknown_geography_rejected():
@@ -53,3 +54,17 @@ def test_impossible_age_rejected():
     row["Age"] = -5
     with pytest.raises(SchemaError):
         validate_raw(pd.DataFrame([row]))
+
+
+def test_missing_column_rejected():
+    row = _valid_row()
+    del row["CreditScore"]
+    with pytest.raises(SchemaError):
+        validate_raw(pd.DataFrame([row]))
+
+
+def test_nullable_balance_accepted():
+    row = _valid_row()
+    row["Balance"] = None
+    out = validate_raw(pd.DataFrame([row]))
+    assert len(out) == 1
