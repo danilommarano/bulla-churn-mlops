@@ -1,0 +1,29 @@
+[project]
+name = "churn"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Danilo Matrangolo Marano", email = "danilo.m.marano@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.5.2",
+    "pandas>=3.0.5",
+    "pandera[pandas]>=0.22",
+    "pydantic-settings>=2.15.0",
+    "scikit-learn>=1.9.0",
+]
+
+[project.scripts]
+churn = "churn:main"
+
+[build-system]
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.3",
+]
