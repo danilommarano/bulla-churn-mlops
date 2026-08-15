@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from churn.features.aggregations import GeographyChurnRateEncoder
 
@@ -32,3 +33,15 @@ def test_unseen_geography_falls_back_to_global_rate():
     enc = GeographyChurnRateEncoder().fit(train)
     out = enc.transform(_frame(["Rio de Janeiro"], [0]))
     assert abs(out.iloc[0] - (1 / 3)) < 1e-9
+
+
+def test_transform_before_fit_raises():
+    enc = GeographyChurnRateEncoder()
+    with pytest.raises(RuntimeError):
+        enc.transform(_frame(["Sao Paulo"], [0]))
+
+
+def test_fit_returns_self():
+    train = _frame(["Sao Paulo", "Minas Gerais"], [1, 0])
+    enc = GeographyChurnRateEncoder()
+    assert enc.fit(train) is enc

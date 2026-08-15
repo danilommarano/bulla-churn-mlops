@@ -1,16 +1,16 @@
-"""Encoder da taxa de churn por geografia — aprendido SÓ no treino (anti-leakage, bug #1)."""
+"""Geography churn-rate encoder — learned on TRAIN ONLY (anti-leakage, bug #1)."""
 
 import pandas as pd
 
 
 class GeographyChurnRateEncoder:
-    """Aprende a taxa média de `turnover` por `Geography` no conjunto de treino e a aplica.
+    """Learns the mean `turnover` rate per `Geography` on the training set and applies it.
 
-    - `fit(df_train)`: memoriza a média do alvo por grupo e a taxa global (fallback).
-    - `transform(df)`: mapeia cada linha para a taxa aprendida; geografia não vista → taxa global.
+    - `fit(df_train)`: memorizes the per-group target mean and the global rate (fallback).
+    - `transform(df)`: maps each row to the learned rate; unseen geography -> global rate.
 
-    Como o mapeamento vem exclusivamente do treino, o conjunto de teste/produção nunca
-    influencia o valor da feature — não há vazamento do rótulo.
+    Because the mapping comes exclusively from training data, the test/production set never
+    influences the feature value — there is no target leakage.
     """
 
     def __init__(self, geography_col: str = "Geography", target_col: str = "turnover"):
@@ -23,4 +23,6 @@ class GeographyChurnRateEncoder:
         return self
 
     def transform(self, df: pd.DataFrame) -> pd.Series:
-        return df[self.geography_col].map(self.mapping_).fillna(self.global_rate_)
+        if not hasattr(self, "mapping_"):
+            raise RuntimeError("Call fit() before transform().")
+        return df[self.geography_col].map(self.mapping_).fillna(self.global_rate_).astype(float)
