@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from churn!")
+"""Churn MLOps package: data contract, features, scoring and (later) training/serving."""

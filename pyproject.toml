@@ -1,7 +1,7 @@
 [project]
 name = "churn"
 version = "0.1.0"
-description = "Add your description here"
+description = "Local MLOps pipeline for customer churn prediction (Bulla technical test)"
 readme = "README.md"
 authors = [
     { name = "Danilo Matrangolo Marano", email = "danilo.m.marano@gmail.com" }
@@ -14,9 +14,6 @@ dependencies = [
     "pydantic-settings>=2.15.0",
     "scikit-learn>=1.9.0",
 ]
-
-[project.scripts]
-churn = "churn:main"
 
 [build-system]
 requires = ["uv_build>=0.11.14,<0.12.0"]

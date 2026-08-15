@@ -19,10 +19,10 @@ def test_fit_learns_train_group_means():
 
 
 def test_transform_uses_train_mapping_not_test_labels():
-    # No treino, SP tem churn 0.5. No teste, SP tem churn 1.0.
-    # O transform DEVE devolver 0.5 (aprendido no treino), nunca 1.0 (rótulo do teste).
+    # In train, SP has churn 0.5. In test, SP has churn 1.0.
+    # transform MUST return 0.5 (learned on train), never 1.0 (the test label).
     train = _frame(["Sao Paulo", "Sao Paulo"], [1, 0])  # SP: 0.5
-    test = _frame(["Sao Paulo", "Sao Paulo"], [1, 1])   # SP: 1.0 (não pode vazar)
+    test = _frame(["Sao Paulo", "Sao Paulo"], [1, 1])   # SP: 1.0 (must not leak)
     enc = GeographyChurnRateEncoder().fit(train)
     out = enc.transform(test)
     assert list(out) == [0.5, 0.5]
