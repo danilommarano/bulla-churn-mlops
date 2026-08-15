@@ -1,4 +1,4 @@
-"""Contrato de dados do CSV bruto (Pandera). Barra dados fora do padrão antes do treino."""
+"""Raw CSV data contract (Pandera). Rejects out-of-spec data before training."""
 
 import pandas as pd
 from pandera.pandas import Check, Column, DataFrameSchema
@@ -28,11 +28,11 @@ RAW_SCHEMA = DataFrameSchema(
         "Card Type": Column(str, Check.isin(CARD_TYPES)),
         "Point Earned": Column(int, Check.ge(0)),
     },
-    strict=False,  # tolera colunas extras (ex.: índice)
+    strict=False,  # tolerate extra columns (e.g., index)
     coerce=True,
 )
 
 
 def validate_raw(df: pd.DataFrame) -> pd.DataFrame:
-    """Valida o DataFrame bruto contra RAW_SCHEMA. Lança SchemaError se inválido."""
+    """Validate the raw DataFrame against RAW_SCHEMA. Raises SchemaError if invalid."""
     return RAW_SCHEMA.validate(df, lazy=False)

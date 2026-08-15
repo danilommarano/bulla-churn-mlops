@@ -1,10 +1,10 @@
-"""Configuração tipada da pipeline, lida de variáveis de ambiente / .env."""
+"""Typed pipeline configuration, read from environment variables / .env."""
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Parâmetros da pipeline. Prefixo CHURN_ nas variáveis de ambiente."""
+    """Pipeline parameters. Environment variables use the CHURN_ prefix."""
 
     model_config = SettingsConfigDict(env_prefix="CHURN_", env_file=".env", extra="ignore")
 
