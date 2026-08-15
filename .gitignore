@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.uv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# MLflow / MLOps artifacts (gerados)
+mlruns/
+mlartifacts/
+*.db
+
+# Feast (gerado)
+feature_repo/data/
+*.parquet
+
+# Outputs gerados
+predictions.csv
+reports/
+*.html
+
+# OS
+.DS_Store
+
+# Claude Code session artifacts (handoff/memory locais, não versionar)
+.remember/
