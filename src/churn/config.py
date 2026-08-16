@@ -11,6 +11,13 @@ class Settings(BaseSettings):
     data_path: str = "Customer-Churn-Records.csv"
     random_state: int = 42
     test_size: float = 0.2
+    n_age_bins: int = 5
+
+    # MLflow (local, no server) + model registry
+    mlflow_tracking_uri: str = "sqlite:///mlflow.db"
+    mlflow_experiment: str = "churn"
+    model_name: str = "churn-model"
+    model_alias: str = "production"
 
 
 settings = Settings()

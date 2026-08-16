@@ -14,3 +14,12 @@ def test_env_override(monkeypatch):
     s = Settings()
     assert s.random_state == 7
     assert s.test_size == 0.3
+
+
+def test_mlflow_and_model_defaults():
+    s = Settings()
+    assert s.n_age_bins == 5
+    assert s.mlflow_tracking_uri == "sqlite:///mlflow.db"
+    assert s.mlflow_experiment == "churn"
+    assert s.model_name == "churn-model"
+    assert s.model_alias == "production"
