@@ -31,7 +31,16 @@ INPUT_COLUMNS = RAW_NUMERIC + RAW_CATEGORICAL
 
 
 class ChurnFeatureBuilder(BaseEstimator, TransformerMixin):
-    """Adds balance_per_product, geography_churn_rate and age_bucket to the frame."""
+    """Adds the derived model features to the raw frame, learning nothing from the target.
+
+    Input: a DataFrame with the INPUT_COLUMNS raw columns. `fit(X, y)` requires the
+    target `y` (used only to learn the per-geography churn rate on train) and learns the
+    Age quantile-bin edges. `transform(X)` returns X plus three columns:
+    `balance_per_product` (Balance / NumOfProducts; Balance nulls filled with 0),
+    `geography_churn_rate` (train-learned rate, unseen geography -> global rate) and
+    `age_bucket` (ordinal quantile bin of Age). `EstimatedSalary` nulls are filled with 0
+    so the downstream StandardScaler never sees NaN.
+    """
 
     def __init__(self, n_age_bins: int = 5, random_state: int = 42):
         self.n_age_bins = n_age_bins

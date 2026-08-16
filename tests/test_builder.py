@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from churn.features.builder import INPUT_COLUMNS, ChurnFeatureBuilder  # noqa: F401
+from churn.features.builder import ChurnFeatureBuilder
 
 
 def _raw(n_geo, geos, ages, balances, products, target):
