@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup test lint format train serve
+.PHONY: help setup test lint format train serve docker-build docker-run
 
 help: ## Lista os targets disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -25,3 +25,12 @@ train: ## Treina o modelo e registra no MLflow (backend SQLite local)
 
 serve: ## Sobe a API FastAPI (modelo @production do MLflow local)
 	uv run uvicorn churn.serving.api:app --host 0.0.0.0 --port 8000
+
+docker-build: ## Constrói a imagem Docker da API
+	docker build -f docker/Dockerfile -t churn-api .
+
+docker-run: ## Roda o container com o registry MLflow local montado (precisa de `make train` antes)
+	docker run --rm -p 8000:8000 \
+		-v "$(CURDIR)/mlflow.db:/app/mlflow.db" \
+		-v "$(CURDIR)/mlruns:$(CURDIR)/mlruns" \
+		churn-api
