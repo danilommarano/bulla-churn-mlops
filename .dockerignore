@@ -1,0 +1,14 @@
+.venv/
+.git/
+estudo-local/
+mlruns/
+mlartifacts/
+*.db
+.pytest_cache/
+.ruff_cache/
+__pycache__/
+.remember/
+docs/
+legacy/
+notebooks/
+tests/
