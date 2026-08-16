@@ -8,8 +8,9 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "mlflow>=3.15.1",
     "numpy>=2.5.2",
-    "pandas>=3.0.5",
+    "pandas>=2.2,<3",
     "pandera[pandas]>=0.22",
     "pydantic-settings>=2.15.0",
     "scikit-learn>=1.9.0",
