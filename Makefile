@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup test lint format
+.PHONY: help setup test lint format train
 
 help: ## Lista os targets disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -19,3 +19,6 @@ lint: ## Checa estilo com ruff
 
 format: ## Formata com ruff
 	uv run ruff format src tests
+
+train: ## Treina o modelo e registra no MLflow (backend SQLite local)
+	uv run python -m churn.training.train
