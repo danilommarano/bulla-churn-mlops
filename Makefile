@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup test lint format train
+.PHONY: help setup test lint format train serve
 
 help: ## Lista os targets disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -22,3 +22,6 @@ format: ## Formata com ruff
 
 train: ## Treina o modelo e registra no MLflow (backend SQLite local)
 	uv run python -m churn.training.train
+
+serve: ## Sobe a API FastAPI (modelo @production do MLflow local)
+	uv run uvicorn churn.serving.api:app --host 0.0.0.0 --port 8000
