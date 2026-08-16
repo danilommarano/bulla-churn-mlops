@@ -33,10 +33,8 @@ def test_train_logs_run_and_registers_model(tmp_path):
     mv = client.get_model_version_by_alias(cfg.model_name, cfg.model_alias)
     assert str(mv.version) == result["version"]
 
+    # the model loads from the registry and predicts on the same input schema it was trained on
     model = load_model(f"models:/{cfg.model_name}@{cfg.model_alias}")
-    preds = model.predict.__self__  # sanity: it is a loaded estimator
-    assert preds is not None
-    # it accepts the same input schema the pipeline was trained on
     from churn.data import load_raw
 
     sample = load_raw(cfg.data_path)[INPUT_COLUMNS].head(5)
