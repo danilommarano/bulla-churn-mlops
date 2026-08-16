@@ -105,6 +105,12 @@ def test_predict_handles_null_optional_fields(client):
     assert r.status_code == 200
 
 
+def test_predict_empty_list_returns_empty(client):
+    r = client.post("/predict", json=[])
+    assert r.status_code == 200
+    assert r.json() == []
+
+
 def test_predict_requires_a_loaded_model():
     # no dependency override, lifespan not run -> app.state.model missing -> 503
     r = TestClient(app).post("/predict", json=[_VALID])

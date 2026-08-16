@@ -46,6 +46,8 @@ def health() -> dict:
 
 @app.post("/predict", response_model=list[Prediction])
 def predict(records: list[CustomerFeatures], model=Depends(get_model)) -> list[Prediction]:  # noqa: B008
+    if not records:
+        return []
     frame = pd.DataFrame([r.model_dump(by_alias=True) for r in records])[INPUT_COLUMNS]
     proba = model.predict_proba(frame)
     preds = model.predict(frame)
