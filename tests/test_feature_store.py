@@ -43,3 +43,19 @@ def test_definitions_build(tmp_path):
     assert fv.name == FEATURE_VIEW_NAME == "geo_churn_stats"
     assert FEATURE_NAME in [f.name for f in fv.features]
     assert GLOBAL_KEY == "__global__"
+
+
+def test_build_offline_frame_matches_encoder(tmp_path):
+    from churn.feature_store.materialize import build_offline_frame
+
+    cfg = _cfg(tmp_path)
+    frame = build_offline_frame(cfg)
+    encoder = _train_encoder(cfg)
+
+    assert "event_timestamp" in frame.columns
+    assert GLOBAL_KEY in set(frame["Geography"])
+
+    lookup = dict(zip(frame["Geography"], frame[FEATURE_NAME]))
+    for geo, rate in encoder.mapping_.items():
+        assert lookup[geo] == pytest.approx(rate, abs=1e-9)
+    assert lookup[GLOBAL_KEY] == pytest.approx(encoder.global_rate_, abs=1e-9)
