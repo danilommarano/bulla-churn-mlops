@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup test lint format train serve docker-build docker-run
+.PHONY: help setup test lint format train serve feast-materialize docker-build docker-run
 
 help: ## Lista os targets disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -23,6 +23,9 @@ format: ## Formata com ruff
 train: ## Treina o modelo e registra no MLflow (backend SQLite local)
 	uv run python -m churn.training.train
 
+feast-materialize: ## Popula e materializa a feature store Feast (offline -> online)
+	uv run python -m churn.feature_store.materialize
+
 serve: ## Sobe a API FastAPI (modelo @production do MLflow local)
 	uv run uvicorn churn.serving.api:app --host 0.0.0.0 --port 8000
 
@@ -33,4 +36,5 @@ docker-run: ## Roda o container com o registry MLflow local montado (precisa de 
 	docker run --rm -p 8000:8000 \
 		-v "$(CURDIR)/mlflow.db:/app/mlflow.db" \
 		-v "$(CURDIR)/mlruns:$(CURDIR)/mlruns" \
+		-v "$(CURDIR)/feature_repo:$(CURDIR)/feature_repo" \
 		churn-api

@@ -23,3 +23,14 @@ def test_mlflow_and_model_defaults():
     assert s.mlflow_experiment == "churn"
     assert s.model_name == "churn-model"
     assert s.model_alias == "production"
+
+
+def test_feast_paths_compose():
+    s = Settings(feast_repo_path="/tmp/fr")
+    assert s.feast_registry_path == "/tmp/fr/registry.db"
+    assert s.feast_online_path == "/tmp/fr/online_store.db"
+    assert s.feast_offline_path == "/tmp/fr/data/geo_churn_stats.parquet"
+
+
+def test_feast_repo_path_default():
+    assert Settings().feast_repo_path == "feature_repo"
