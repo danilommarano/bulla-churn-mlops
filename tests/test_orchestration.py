@@ -62,3 +62,30 @@ def test_train_model_persists_fitted_pipeline(tmp_path):
     sample = pd.read_parquet(test_out)[INPUT_COLUMNS].head(5)
     assert len(model.predict(sample)) == 5
     assert model.predict_proba(sample).shape == (5, 2)
+
+
+def test_evaluate_model_writes_metrics_json(tmp_path):
+    import json
+
+    from churn.orchestration.steps.evaluate_model import evaluate_model
+    from churn.orchestration.steps.prepare_data import prepare_data
+    from churn.orchestration.steps.split_data import split_data
+    from churn.orchestration.steps.train_model import train_model
+
+    prepared = tmp_path / "prepared.parquet"
+    prepare_data(str(prepared), CSV_PATH)
+    train_out = tmp_path / "train.parquet"
+    test_out = tmp_path / "test.parquet"
+    split_data(str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42)
+    model_out = tmp_path / "model.joblib"
+    train_model(str(train_out), str(model_out), random_state=42, n_age_bins=5)
+
+    metrics_out = tmp_path / "metrics.json"
+    returned = evaluate_model(str(model_out), str(test_out), str(metrics_out))
+
+    on_disk = json.loads(metrics_out.read_text())
+    assert on_disk == returned
+    for key in ("roc_auc", "precision", "recall", "f1", "accuracy", "confusion_matrix"):
+        assert key in on_disk
+    assert 0.0 < on_disk["roc_auc"] < 1.0
+    assert on_disk["roc_auc"] > 0.7
