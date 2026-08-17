@@ -34,3 +34,11 @@ def test_feast_paths_compose():
 
 def test_feast_repo_path_default():
     assert Settings().feast_repo_path == "feature_repo"
+
+
+def test_monitoring_defaults_and_paths():
+    cfg = Settings()
+    assert cfg.reports_dir == "reports"
+    assert cfg.drift_threshold == 0.3
+    assert cfg.monitoring_report_path == "reports/drift.html"
+    assert cfg.monitoring_metrics_path == "reports/metrics.json"

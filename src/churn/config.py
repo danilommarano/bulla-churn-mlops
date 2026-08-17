@@ -37,5 +37,17 @@ class Settings(BaseSettings):
     def feast_offline_path(self) -> str:
         return str(Path(self.feast_repo_path) / "data" / "geo_churn_stats.parquet")
 
+    # Model monitoring (Vertex AI Model Monitoring equivalent)
+    reports_dir: str = "reports"
+    drift_threshold: float = 0.3  # Jensen-Shannon per-feature, Vertex default parity
+
+    @property
+    def monitoring_report_path(self) -> str:
+        return str(Path(self.reports_dir) / "drift.html")
+
+    @property
+    def monitoring_metrics_path(self) -> str:
+        return str(Path(self.reports_dir) / "metrics.json")
+
 
 settings = Settings()
