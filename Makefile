@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup test lint format train pipeline serve feast-materialize docker-build docker-run
+.PHONY: help setup test lint format train pipeline serve feast-materialize monitor monitor-drift docker-build docker-run
 
 help: ## Lista os targets disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -31,6 +31,12 @@ feast-materialize: ## Popula e materializa a feature store Feast (offline -> onl
 
 serve: ## Sobe a API FastAPI (modelo @production do MLflow local)
 	uv run uvicorn churn.serving.api:app --host 0.0.0.0 --port 8000
+
+monitor: ## Gera o relatório de drift/qualidade (holdout saudável; gate deve passar)
+	uv run python -m churn.monitoring
+
+monitor-drift: ## Idem com drift simulado (demonstra detecção; gate falha de propósito)
+	uv run python -m churn.monitoring --simulate-drift
 
 docker-build: ## Constrói a imagem Docker da API
 	docker build -f docker/Dockerfile -t churn-api .
