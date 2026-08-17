@@ -33,3 +33,6 @@ reports/
 
 # Claude Code session artifacts (handoff/memory locais, não versionar)
 .remember/
+
+# Feast local artifacts (generated)
+feature_repo/
