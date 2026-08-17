@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "evidently>=0.7.11",       # model monitoring / drift reports (Vertex AI Model Monitoring equivalent)
     "fastapi>=0.141.1",
     "feast>=0.54",
     "kfp>=2.17.0",              # local pipeline orchestration (Vertex AI Pipelines equivalent)
