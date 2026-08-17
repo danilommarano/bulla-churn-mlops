@@ -40,3 +40,25 @@ def test_split_data_reproduces_stratified_split(tmp_path):
     assert len(test_df) == 2000
     # stratified: class balance preserved within ~1 percentage point
     assert abs(train_df["turnover"].mean() - test_df["turnover"].mean()) < 0.01
+
+
+def test_train_model_persists_fitted_pipeline(tmp_path):
+    import joblib
+
+    from churn.orchestration.steps.prepare_data import prepare_data
+    from churn.orchestration.steps.split_data import split_data
+    from churn.orchestration.steps.train_model import train_model
+
+    prepared = tmp_path / "prepared.parquet"
+    prepare_data(str(prepared), CSV_PATH)
+    train_out = tmp_path / "train.parquet"
+    test_out = tmp_path / "test.parquet"
+    split_data(str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42)
+
+    model_out = tmp_path / "model.joblib"
+    train_model(str(train_out), str(model_out), random_state=42, n_age_bins=5)
+
+    model = joblib.load(model_out)
+    sample = pd.read_parquet(test_out)[INPUT_COLUMNS].head(5)
+    assert len(model.predict(sample)) == 5
+    assert model.predict_proba(sample).shape == (5, 2)
