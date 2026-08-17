@@ -154,10 +154,10 @@ build_offline_frame → parquet (FileSource)   ← OFFLINE store
 SQLite online_store.db                        ← ONLINE store
         │  get_online_features(...)
         ▼
-get_geography_churn_rate(["France", ...])     ← serving online por entity key
+get_geography_churn_rate(["Sao Paulo", ...])  ← serving online por entity key
         │
         ▼
-GET /features/geography/France  →  {"geography_churn_rate": 0.16...}
+GET /features/geography/Sao Paulo  →  {"geography_churn_rate": 0.16...}
 ```
 
 **Garantia anti-skew (por construção):** o parquet offline é derivado do **mesmo**
@@ -186,14 +186,14 @@ Fixture module-scoped que materializa numa `tmp_path` via `Settings` parametriza
 1. **`test_definitions_build`** — a entity, o source e a feature view são construídos com nomes, join
    keys e schema esperados.
 2. **`test_materialize_end_to_end`** — após materializar contra o CSV real num repo temporário,
-   `get_geography_churn_rate(["France", "Germany", "Spain"])` retorna 3 floats em `(0, 1)`.
+   `get_geography_churn_rate(["Minas Gerais", "Rio de Janeiro", "Sao Paulo"])` retorna 3 floats em `(0, 1)`.
 3. **`test_online_matches_training_encoder`** *(a prova anti-skew)* — fita
    `GeographyChurnRateEncoder` no mesmo split de train; afirma que, para cada geografia, o valor
    servido **online pelo Feast** == `encoder.mapping_[geografia]` (tolerância `1e-6`).
-4. **`test_unseen_geography_falls_back_to_global`** — consulta uma geografia fora do train
-   (ex.: `"Sao Paulo"`) → retorna o `global_rate_`.
+4. **`test_unseen_geography_falls_back_to_global`** — consulta uma geografia fora do domínio
+   (ex.: `"Bahia"`, que o schema nem aceitaria no CSV) → retorna o `global_rate_`.
 5. **`test_api_feature_endpoint`** — com store materializado (via `dependency_overrides`/`Settings`
-   de teste), `GET /features/geography/France` responde 200 com o rate; sem store → 503.
+   de teste), `GET /features/geography/Sao Paulo` responde 200 com o rate; sem store → 503.
 
 Critério de pronto: os 42 testes existentes continuam verdes + os novos passam (`make test`), e
 `make lint` limpo.
