@@ -175,7 +175,7 @@ def test_pipeline_end_to_end(tmp_path):
         min_roc_auc=0.5,
     )
 
-    run = run_local(cfg)
+    run = run_local(cfg, pipeline_root=str(tmp_path / "kfp_outputs"))
     assert run.state.name == "FINAL"
 
     # the DAG registered a version and promoted it (gate passes at 0.5)

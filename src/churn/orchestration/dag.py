@@ -113,13 +113,20 @@ def churn_training_pipeline(
     )
 
 
-def run_local(cfg: Settings = settings):
-    """Initialize the local SubprocessRunner and execute the DAG end to end."""
-    local.init(
-        runner=local.SubprocessRunner(use_venv=False),
-        raise_on_error=True,
-        enable_caching=False,
-    )
+def run_local(cfg: Settings = settings, pipeline_root: str | None = None):
+    """Initialize the local SubprocessRunner and execute the DAG end to end.
+
+    `pipeline_root` overrides where KFP writes component artifacts (defaults to
+    ./local_outputs). Note: local.init sets KFP-global state, so the last call wins.
+    """
+    init_kwargs = {
+        "runner": local.SubprocessRunner(use_venv=False),
+        "raise_on_error": True,
+        "enable_caching": False,
+    }
+    if pipeline_root is not None:
+        init_kwargs["pipeline_root"] = pipeline_root
+    local.init(**init_kwargs)
     return churn_training_pipeline(
         data_path=cfg.data_path,
         test_size=cfg.test_size,
