@@ -8,13 +8,17 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Pipeline parameters. Environment variables use the CHURN_ prefix."""
 
-    model_config = SettingsConfigDict(env_prefix="CHURN_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="CHURN_", env_file=".env", extra="ignore"
+    )
 
     data_path: str = "Customer-Churn-Records.csv"
     random_state: int = 42
     test_size: float = 0.2
     n_age_bins: int = 5
-    min_roc_auc: float = 0.70  # promotion gate: register_model moves @production only if roc_auc >= this
+    min_roc_auc: float = (
+        0.70  # promotion gate: register_model moves @production only if roc_auc >= this
+    )
 
     # MLflow (local, no server) + model registry
     mlflow_tracking_uri: str = "sqlite:///mlflow.db"

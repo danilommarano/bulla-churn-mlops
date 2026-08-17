@@ -14,7 +14,14 @@ def _perfectly_separable():
 def test_evaluate_returns_all_metrics():
     model, X, y = _perfectly_separable()
     m = evaluate(model, X, y)
-    assert set(m) == {"roc_auc", "precision", "recall", "f1", "accuracy", "confusion_matrix"}
+    assert set(m) == {
+        "roc_auc",
+        "precision",
+        "recall",
+        "f1",
+        "accuracy",
+        "confusion_matrix",
+    }
 
 
 def test_metrics_are_in_range_and_high_on_separable_data():

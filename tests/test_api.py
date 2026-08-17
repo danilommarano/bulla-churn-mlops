@@ -101,7 +101,9 @@ def test_predict_rejects_invalid_payload(client):
 
 
 def test_predict_handles_null_optional_fields(client):
-    r = client.post("/predict", json=[{**_VALID, "Balance": None, "EstimatedSalary": None}])
+    r = client.post(
+        "/predict", json=[{**_VALID, "Balance": None, "EstimatedSalary": None}]
+    )
     assert r.status_code == 200
 
 

@@ -25,4 +25,9 @@ class GeographyChurnRateEncoder:
     def transform(self, df: pd.DataFrame) -> pd.Series:
         if not hasattr(self, "mapping_"):
             raise RuntimeError("Call fit() before transform().")
-        return df[self.geography_col].map(self.mapping_).fillna(self.global_rate_).astype(float)
+        return (
+            df[self.geography_col]
+            .map(self.mapping_)
+            .fillna(self.global_rate_)
+            .astype(float)
+        )

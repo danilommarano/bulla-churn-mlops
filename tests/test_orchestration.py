@@ -1,8 +1,10 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from churn.features.builder import INPUT_COLUMNS
+from churn.orchestration.steps.register_model import ModelGateError, require_promotion
 
 CSV_PATH = str(Path(__file__).resolve().parents[1] / "Customer-Churn-Records.csv")
 
@@ -27,7 +29,9 @@ def test_split_data_reproduces_stratified_split(tmp_path):
 
     train_out = tmp_path / "train.parquet"
     test_out = tmp_path / "test.parquet"
-    split_data(str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42)
+    split_data(
+        str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42
+    )
 
     train_df = pd.read_parquet(train_out)
     test_df = pd.read_parquet(test_out)
@@ -53,7 +57,9 @@ def test_train_model_persists_fitted_pipeline(tmp_path):
     prepare_data(str(prepared), CSV_PATH)
     train_out = tmp_path / "train.parquet"
     test_out = tmp_path / "test.parquet"
-    split_data(str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42)
+    split_data(
+        str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42
+    )
 
     model_out = tmp_path / "model.joblib"
     train_model(str(train_out), str(model_out), random_state=42, n_age_bins=5)
@@ -76,7 +82,9 @@ def test_evaluate_model_writes_metrics_json(tmp_path):
     prepare_data(str(prepared), CSV_PATH)
     train_out = tmp_path / "train.parquet"
     test_out = tmp_path / "test.parquet"
-    split_data(str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42)
+    split_data(
+        str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42
+    )
     model_out = tmp_path / "model.joblib"
     train_model(str(train_out), str(model_out), random_state=42, n_age_bins=5)
 
@@ -102,7 +110,9 @@ def _build_artifacts(tmp_path):
     prepare_data(str(prepared), CSV_PATH)
     train_out = tmp_path / "train.parquet"
     test_out = tmp_path / "test.parquet"
-    split_data(str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42)
+    split_data(
+        str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42
+    )
     model_out = tmp_path / "model.joblib"
     train_model(str(train_out), str(model_out), random_state=42, n_age_bins=5)
     metrics_out = tmp_path / "metrics.json"
@@ -182,3 +192,20 @@ def test_pipeline_end_to_end(tmp_path):
     client = MlflowClient(tracking_uri=cfg.mlflow_tracking_uri)
     mv = client.get_model_version_by_alias(cfg.model_name, cfg.model_alias)
     assert str(mv.version) == "1"
+
+
+def test_require_promotion_raises_when_gate_rejects():
+    with pytest.raises(ModelGateError):
+        require_promotion(
+            {"promoted": False, "roc_auc": 0.5, "run_id": "r", "version": 1}
+        )
+
+
+def test_require_promotion_passes_when_promoted():
+    # Must not raise; returns None.
+    assert (
+        require_promotion(
+            {"promoted": True, "roc_auc": 0.8, "run_id": "r", "version": 1}
+        )
+        is None
+    )

@@ -4,7 +4,7 @@ from churn.scoring import retention_score
 
 
 def test_scalar_bounds():
-    assert retention_score(0.0) == 0   # no chance of staying -> score 0
+    assert retention_score(0.0) == 0  # no chance of staying -> score 0
     assert retention_score(1.0) == 10  # certain to stay -> score 10
 
 

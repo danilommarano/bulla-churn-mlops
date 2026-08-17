@@ -44,7 +44,9 @@ def build_report(reference_df, current_df, cfg: Settings):
             # 0.3 cutoff is semantically unrelated). Categorical columns keep
             # Evidently's default stattest/threshold; Vertex's L-infinity for
             # categoricals has no Evidently equivalent (documented gap in the spec).
-            DataDriftPreset(num_method="jensenshannon", num_threshold=cfg.drift_threshold),
+            DataDriftPreset(
+                num_method="jensenshannon", num_threshold=cfg.drift_threshold
+            ),
             ValueDrift(column="prob_churn"),
             ClassificationQuality(),
         ],

@@ -34,7 +34,5 @@ def test_build_reference_current_shapes_and_columns(tmp_path):
 def test_build_reference_current_can_perturb(tmp_path):
     cfg = Settings()
     _, current_plain = build_reference_current(cfg, model=_FakeModel())
-    _, current_drift = build_reference_current(
-        cfg, model=_FakeModel(), simulate=True
-    )
+    _, current_drift = build_reference_current(cfg, model=_FakeModel(), simulate=True)
     assert current_drift["Age"].mean() != current_plain["Age"].mean()
