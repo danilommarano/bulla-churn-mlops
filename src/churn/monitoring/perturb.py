@@ -8,11 +8,15 @@ columns and the target are preserved. No global RNG; fully deterministic.
 import pandas as pd
 
 # Fixed additive/multiplicative shifts applied to raw numeric features present.
+# Chosen strong enough that several columns cross the 0.3 Jensen-Shannon threshold,
+# so the `make monitor-drift` demo fails the gate with a comfortable margin (not a
+# knife-edge that a resample or an Evidently patch could silently flip to PASS).
 _SHIFTS = {
-    "Age": lambda s: s + 15,
-    "Balance": lambda s: s * 1.5,
-    "CreditScore": lambda s: s - 100,
-    "EstimatedSalary": lambda s: s * 1.3,
+    "Age": lambda s: s + 20,
+    "Balance": lambda s: s * 2.0,
+    "CreditScore": lambda s: s - 150,
+    "EstimatedSalary": lambda s: s * 1.6,
+    "Point Earned": lambda s: s * 1.6,
 }
 
 

@@ -14,7 +14,17 @@ def test_evaluate_gate_fails_when_share_exceeds_threshold():
 
 
 def test_summarize_extracts_drift_share_from_real_snapshot():
-    snapshot = build_report(_scored_frame(0.0), _scored_frame(0.0), Settings())
+    # Reference vs a SHIFTED current, so real drift is present. This pins that
+    # _find_metric actually located DriftedColumnsCount and parsed its share —
+    # an identical (0.0 vs 0.0) pair would pass even if parsing silently returned 0.
+    snapshot = build_report(_scored_frame(0.0), _scored_frame(1.0), Settings())
     summary = summarize(snapshot)
-    assert "drift_share" in summary
-    assert 0.0 <= summary["drift_share"] <= 1.0
+    assert summary["drift_share"] > 0.0
+    assert summary["drifted_columns"] >= 1
+
+
+def test_summarize_surfaces_model_quality_metrics():
+    snapshot = build_report(_scored_frame(0.0), _scored_frame(0.0), Settings())
+    quality = summarize(snapshot)["quality"]
+    assert "roc_auc" in quality
+    assert 0.0 <= quality["roc_auc"] <= 1.0

@@ -37,9 +37,14 @@ def build_report(reference_df, current_df, cfg: Settings):
     )
     report = Report(
         [
-            # Jensen-Shannon + cfg.drift_threshold for Vertex AI parity on numeric
-            # drift; DriftedColumnsCount.value.share feeds the quality gate.
-            DataDriftPreset(num_method="jensenshannon", threshold=cfg.drift_threshold),
+            # Jensen-Shannon + cfg.drift_threshold on NUMERIC columns for Vertex AI
+            # parity; DriftedColumnsCount.value.share feeds the quality gate. We set
+            # num_threshold only (not the global `threshold`, which would also apply
+            # 0.3 to the categorical p-value stattests — chi-square/Z-test — where a
+            # 0.3 cutoff is semantically unrelated). Categorical columns keep
+            # Evidently's default stattest/threshold; Vertex's L-infinity for
+            # categoricals has no Evidently equivalent (documented gap in the spec).
+            DataDriftPreset(num_method="jensenshannon", num_threshold=cfg.drift_threshold),
             ValueDrift(column="prob_churn"),
             ClassificationQuality(),
         ],

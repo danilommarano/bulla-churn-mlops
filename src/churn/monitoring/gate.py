@@ -23,19 +23,49 @@ def _find_metric(metrics, needle: str):
     return None
 
 
+# Evidently metric_name -> summary key for the model-quality half of the report
+# (Vertex AI "model quality"). Each has a scalar float value in snapshot.dict().
+_QUALITY_METRICS = {
+    "Accuracy": "accuracy",
+    "Precision": "precision",
+    "Recall": "recall",
+    "F1Score": "f1",
+    "RocAuc": "roc_auc",
+    "LogLoss": "log_loss",
+}
+
+
 def summarize(snapshot) -> dict:
-    """Extract the key monitoring numbers into a JSON-serializable dict."""
+    """Extract the key monitoring numbers into a JSON-serializable dict.
+
+    Raises RuntimeError if the drift metric is missing or malformed: for a
+    monitoring tool the safe failure mode is a loud error, not a silent "no drift"
+    that would let a broken run exit 0 and look healthy.
+    """
     payload = snapshot.dict()
     metrics = payload.get("metrics", [])
-    drift = _find_metric(metrics, "DriftedColumnsCount") or {}
-    value = drift.get("value", {})
-    # value is expected like {"count": N, "share": S}; fall back defensively.
-    if isinstance(value, dict):
-        drift_share = float(value.get("share", 0.0))
-        drifted_count = int(value.get("count", 0))
-    else:
-        drift_share, drifted_count = 0.0, 0
-    return {"drift_share": drift_share, "drifted_columns": drifted_count}
+
+    drift = _find_metric(metrics, "DriftedColumnsCount")
+    if drift is None:
+        raise RuntimeError(
+            "DriftedColumnsCount metric not found in the Evidently snapshot; "
+            "the Evidently API may have changed (see report.py / gate.py)."
+        )
+    value = drift.get("value")
+    if not isinstance(value, dict) or "share" not in value or "count" not in value:
+        raise RuntimeError(f"Unexpected DriftedColumnsCount value shape: {value!r}")
+
+    quality = {}
+    for name, key in _QUALITY_METRICS.items():
+        metric = _find_metric(metrics, name)
+        if metric is not None and not isinstance(metric.get("value"), dict):
+            quality[key] = float(metric["value"])
+
+    return {
+        "drift_share": float(value["share"]),
+        "drifted_columns": int(value["count"]),
+        "quality": quality,
+    }
 
 
 def evaluate_gate(summary: dict, threshold: float) -> bool:
