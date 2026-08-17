@@ -1,5 +1,7 @@
 """Typed pipeline configuration, read from environment variables / .env."""
 
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +20,21 @@ class Settings(BaseSettings):
     mlflow_experiment: str = "churn"
     model_name: str = "churn-model"
     model_alias: str = "production"
+
+    # Feast local feature store (offline parquet + online SQLite, no cloud)
+    feast_repo_path: str = "feature_repo"
+
+    @property
+    def feast_registry_path(self) -> str:
+        return str(Path(self.feast_repo_path) / "registry.db")
+
+    @property
+    def feast_online_path(self) -> str:
+        return str(Path(self.feast_repo_path) / "online_store.db")
+
+    @property
+    def feast_offline_path(self) -> str:
+        return str(Path(self.feast_repo_path) / "data" / "geo_churn_stats.parquet")
 
 
 settings = Settings()
