@@ -66,8 +66,12 @@ class ChurnFeatureBuilder(BaseEstimator, TransformerMixin):
         if not hasattr(self, "geo_"):
             raise RuntimeError("Call fit() before transform().")
         X = X.copy()
-        X["Balance"] = X["Balance"].fillna(0.0)
-        X["EstimatedSalary"] = X["EstimatedSalary"].fillna(0.0)
+        # Cast to float64 *before* filling: some callers (e.g. the API building a frame
+        # from a single record with nulls) hand us object-dtype columns, and pandas'
+        # implicit downcast inside .fillna on object dtype is deprecated. Casting first
+        # makes .fillna operate on floats (no downcast) and gives the scaler what it expects.
+        X["Balance"] = X["Balance"].astype("float64").fillna(0.0)
+        X["EstimatedSalary"] = X["EstimatedSalary"].astype("float64").fillna(0.0)
         X["balance_per_product"] = X["Balance"] / X["NumOfProducts"]
         X["geography_churn_rate"] = self.geo_.transform(X[["Geography"]]).to_numpy()
         X["age_bucket"] = self.age_.transform(X[["Age"]]).ravel()

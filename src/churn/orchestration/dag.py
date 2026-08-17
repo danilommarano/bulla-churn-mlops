@@ -10,14 +10,14 @@ from kfp.dsl import Dataset, Input, Metrics, Model, Output
 from churn.config import Settings, settings
 
 
-@dsl.component
+@dsl.component(base_image="python:3.12")
 def prepare_data_op(output: Output[Dataset], data_path: str):
     from churn.orchestration.steps.prepare_data import prepare_data
 
     prepare_data(output.path, data_path)
 
 
-@dsl.component
+@dsl.component(base_image="python:3.12")
 def split_data_op(
     dataset: Input[Dataset],
     train: Output[Dataset],
@@ -30,7 +30,7 @@ def split_data_op(
     split_data(dataset.path, train.path, test.path, test_size, random_state)
 
 
-@dsl.component
+@dsl.component(base_image="python:3.12")
 def train_model_op(
     train_set: Input[Dataset], model: Output[Model], random_state: int, n_age_bins: int
 ):
@@ -39,7 +39,7 @@ def train_model_op(
     train_model(train_set.path, model.path, random_state, n_age_bins)
 
 
-@dsl.component
+@dsl.component(base_image="python:3.12")
 def evaluate_model_op(
     model: Input[Model], test_set: Input[Dataset], metrics: Output[Metrics]
 ):
@@ -50,7 +50,7 @@ def evaluate_model_op(
         metrics.log_metric(key, float(result[key]))
 
 
-@dsl.component
+@dsl.component(base_image="python:3.12")
 def register_model_op(
     model: Input[Model],
     metrics: Input[Metrics],
