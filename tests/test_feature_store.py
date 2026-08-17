@@ -105,3 +105,29 @@ def test_missing_store_raises(tmp_path):
     cfg = _cfg(tmp_path)
     with pytest.raises(FeatureStoreUnavailable):
         get_geography_churn_rate(["Sao Paulo"], cfg=cfg)
+
+
+def test_feature_endpoint_serves_rate(materialized):
+    from churn.serving.api import app, get_feature_cfg
+
+    app.dependency_overrides[get_feature_cfg] = lambda: materialized
+    try:
+        response = TestClient(app).get("/features/geography/Sao Paulo")
+    finally:
+        app.dependency_overrides.clear()
+    assert response.status_code == 200
+    body = response.json()
+    assert body["geography"] == "Sao Paulo"
+    assert 0.0 < body["geography_churn_rate"] < 1.0
+
+
+def test_feature_endpoint_503_without_store(tmp_path):
+    from churn.serving.api import app, get_feature_cfg
+
+    cfg = _cfg(tmp_path)
+    app.dependency_overrides[get_feature_cfg] = lambda: cfg
+    try:
+        response = TestClient(app).get("/features/geography/Sao Paulo")
+    finally:
+        app.dependency_overrides.clear()
+    assert response.status_code == 503

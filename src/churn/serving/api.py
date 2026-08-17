@@ -11,6 +11,7 @@ from churn.config import Settings, settings
 from churn.features.builder import INPUT_COLUMNS
 from churn.scoring import retention_score
 from churn.serving.schema import CustomerFeatures, Prediction
+from churn.feature_store.store import FeatureStoreUnavailable, get_geography_churn_rate
 
 
 def load_production_model(cfg: Settings = settings):
@@ -56,3 +57,18 @@ def predict(records: list[CustomerFeatures], model=Depends(get_model)) -> list[P
         Prediction(turnover_pred=int(pred), prob_churn=float(churn), score_retencao=int(score))
         for pred, churn, score in zip(preds, proba[:, 1], scores)
     ]
+
+
+def get_feature_cfg() -> Settings:
+    """Settings used by the feature-store endpoint (overridable in tests)."""
+    return settings
+
+
+@app.get("/features/geography/{geography}")
+def geography_feature(geography: str, cfg: Settings = Depends(get_feature_cfg)) -> dict:  # noqa: B008
+    """Serve the online-materialized churn rate for a geography (503 if not materialized)."""
+    try:
+        rate = get_geography_churn_rate([geography], cfg=cfg)[geography]
+    except FeatureStoreUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    return {"geography": geography, "geography_churn_rate": rate}
