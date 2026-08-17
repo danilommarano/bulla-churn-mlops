@@ -10,10 +10,12 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.141.1",
     "feast>=0.54",
+    "kfp>=2.17.0",              # local pipeline orchestration (Vertex AI Pipelines equivalent)
     "mlflow>=3.15.1",
     "numpy>=2.5.2",
     "pandas>=2.2,<3",
     "pandera[pandas]>=0.22",
+    "pip>=26.2.1",              # kfp local SubprocessRunner shells out to pip (uv venv omits it)
     "pydantic-settings>=2.15.0",
     "scikit-learn>=1.9.0",
     "uvicorn[standard]>=0.30.6,<=0.34.0",
