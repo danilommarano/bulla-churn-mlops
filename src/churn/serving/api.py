@@ -8,10 +8,10 @@ import pandas as pd
 from fastapi import Depends, FastAPI, HTTPException, Request
 
 from churn.config import Settings, settings
+from churn.feature_store.store import FeatureStoreUnavailable, get_geography_churn_rate
 from churn.features.builder import INPUT_COLUMNS
 from churn.scoring import retention_score
 from churn.serving.schema import CustomerFeatures, Prediction
-from churn.feature_store.store import FeatureStoreUnavailable, get_geography_churn_rate
 
 
 def load_production_model(cfg: Settings = settings):

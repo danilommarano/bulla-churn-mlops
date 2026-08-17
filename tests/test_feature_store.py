@@ -7,8 +7,6 @@ from sklearn.model_selection import train_test_split
 
 from churn.config import Settings
 from churn.data import load_raw
-from churn.features.aggregations import GeographyChurnRateEncoder
-from churn.features.builder import INPUT_COLUMNS
 from churn.feature_store.definitions import (
     FEATURE_NAME,
     FEATURE_VIEW_NAME,
@@ -16,6 +14,8 @@ from churn.feature_store.definitions import (
     build_feature_view,
     geography,
 )
+from churn.features.aggregations import GeographyChurnRateEncoder
+from churn.features.builder import INPUT_COLUMNS
 
 CSV_PATH = str(Path(__file__).resolve().parents[1] / "Customer-Churn-Records.csv")
 
@@ -100,7 +100,10 @@ def test_unseen_geography_falls_back_to_global(materialized):
 
 
 def test_missing_store_raises(tmp_path):
-    from churn.feature_store.store import FeatureStoreUnavailable, get_geography_churn_rate
+    from churn.feature_store.store import (
+        FeatureStoreUnavailable,
+        get_geography_churn_rate,
+    )
 
     cfg = _cfg(tmp_path)
     with pytest.raises(FeatureStoreUnavailable):

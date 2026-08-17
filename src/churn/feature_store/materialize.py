@@ -1,6 +1,6 @@
 """Populate the offline parquet from the train split and materialize into the online store."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pandas as pd
@@ -20,7 +20,7 @@ from churn.features.builder import INPUT_COLUMNS
 
 # Fixed timestamps keep materialization reproducible (no wall-clock dependence).
 _EVENT_TS = pd.Timestamp("2025-01-01", tz="UTC")
-_MATERIALIZE_END = datetime(2025, 1, 2, tzinfo=timezone.utc)
+_MATERIALIZE_END = datetime(2025, 1, 2, tzinfo=UTC)
 
 
 def build_offline_frame(cfg: Settings = settings) -> pd.DataFrame:
