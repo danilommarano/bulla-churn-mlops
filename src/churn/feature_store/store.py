@@ -34,6 +34,11 @@ def get_geography_churn_rate(
 
     values = dict(zip(response["Geography"], response[FEATURE_NAME]))
     global_rate = values.get(GLOBAL_KEY)
+    if global_rate is None:
+        raise FeatureStoreUnavailable(
+            f"Global fallback key '{GLOBAL_KEY}' missing from the online store. "
+            "The store may be partially materialized — re-run `make feast-materialize`."
+        )
     result: dict[str, float] = {}
     for geo in geographies:
         rate = values.get(geo)

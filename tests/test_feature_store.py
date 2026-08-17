@@ -134,3 +134,34 @@ def test_feature_endpoint_503_without_store(tmp_path):
     finally:
         app.dependency_overrides.clear()
     assert response.status_code == 503
+
+
+def test_partial_materialization_without_global_raises(tmp_path):
+    """A store applied+materialized but missing the __global__ row degrades to
+    FeatureStoreUnavailable (503), not a raw TypeError/500."""
+    from datetime import UTC, datetime
+
+    from churn.feature_store.definitions import build_store
+    from churn.feature_store.store import (
+        FeatureStoreUnavailable,
+        get_geography_churn_rate,
+    )
+
+    cfg = _cfg(tmp_path)
+    frame = pd.DataFrame(
+        {
+            "Geography": ["Sao Paulo"],
+            FEATURE_NAME: [0.2],
+            "event_timestamp": [pd.Timestamp("2025-01-01", tz="UTC")],
+        }
+    )
+    offline_path = Path(cfg.feast_offline_path)
+    offline_path.parent.mkdir(parents=True, exist_ok=True)
+    frame.to_parquet(offline_path, index=False)
+
+    store = build_store(cfg)
+    store.apply([geography, build_feature_view(cfg)])
+    store.materialize_incremental(end_date=datetime(2025, 1, 2, tzinfo=UTC))
+
+    with pytest.raises(FeatureStoreUnavailable):
+        get_geography_churn_rate(["Sao Paulo"], cfg=cfg)
