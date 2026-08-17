@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup test lint format train pipeline serve feast-materialize monitor monitor-drift docker-build docker-run
+.PHONY: help setup test lint format format-check ci train pipeline serve feast-materialize monitor monitor-drift docker-build docker-run
 
 help: ## Lista os targets disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -19,6 +19,16 @@ lint: ## Checa estilo com ruff
 
 format: ## Formata com ruff
 	uv run ruff format src tests
+
+format-check: ## Checa formatação sem alterar (usado no CI)
+	uv run ruff format --check src tests
+
+ci: ## Roda a sequência de CI localmente (espelha o GitHub Actions)
+	$(MAKE) lint
+	$(MAKE) format-check
+	$(MAKE) test
+	$(MAKE) docker-build
+	$(MAKE) pipeline
 
 train: ## Treina o modelo e registra no MLflow (backend SQLite local)
 	uv run python -m churn.training.train
