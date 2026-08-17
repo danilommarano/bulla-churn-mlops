@@ -1,6 +1,8 @@
 from pathlib import Path
 
+import pytest
 from mlflow import MlflowClient
+from mlflow.exceptions import MlflowException
 from sklearn.model_selection import train_test_split
 
 from churn.config import Settings
@@ -60,8 +62,5 @@ def test_log_and_register_skips_alias_when_not_promoting(tmp_path):
     client = MlflowClient(tracking_uri=cfg.mlflow_tracking_uri)
     # a version exists, but no production alias was set
     assert client.get_model_version(cfg.model_name, "1") is not None
-    try:
+    with pytest.raises(MlflowException):
         client.get_model_version_by_alias(cfg.model_name, cfg.model_alias)
-        raise AssertionError("alias should not exist when promote=False")
-    except Exception:  # noqa: BLE001, S110
-        pass
