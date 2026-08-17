@@ -89,3 +89,72 @@ def test_evaluate_model_writes_metrics_json(tmp_path):
         assert key in on_disk
     assert 0.0 < on_disk["roc_auc"] < 1.0
     assert on_disk["roc_auc"] > 0.7
+
+
+def _build_artifacts(tmp_path):
+    """Run prepare -> split -> train -> evaluate, returning the artifact paths."""
+    from churn.orchestration.steps.evaluate_model import evaluate_model
+    from churn.orchestration.steps.prepare_data import prepare_data
+    from churn.orchestration.steps.split_data import split_data
+    from churn.orchestration.steps.train_model import train_model
+
+    prepared = tmp_path / "prepared.parquet"
+    prepare_data(str(prepared), CSV_PATH)
+    train_out = tmp_path / "train.parquet"
+    test_out = tmp_path / "test.parquet"
+    split_data(str(prepared), str(train_out), str(test_out), test_size=0.2, random_state=42)
+    model_out = tmp_path / "model.joblib"
+    train_model(str(train_out), str(model_out), random_state=42, n_age_bins=5)
+    metrics_out = tmp_path / "metrics.json"
+    evaluate_model(str(model_out), str(test_out), str(metrics_out))
+    return str(model_out), str(metrics_out), str(train_out)
+
+
+def _reg_cfg(tmp_path, min_roc_auc):
+    from churn.config import Settings
+
+    return Settings(
+        data_path=CSV_PATH,
+        mlflow_tracking_uri=f"sqlite:///{tmp_path}/mlflow.db",
+        mlflow_experiment="churn-test",
+        model_name="churn-model-test",
+        model_alias="production",
+        min_roc_auc=min_roc_auc,
+    )
+
+
+def test_register_model_promotes_when_gate_passes(tmp_path):
+    from mlflow import MlflowClient
+
+    from churn.orchestration.steps.register_model import register_model
+
+    model_path, metrics_path, train_path = _build_artifacts(tmp_path)
+    cfg = _reg_cfg(tmp_path, min_roc_auc=0.5)
+    result = register_model(model_path, metrics_path, train_path, cfg)
+
+    assert result["promoted"] is True
+    assert result["version"] == "1"
+    assert result["roc_auc"] > 0.7
+    client = MlflowClient(tracking_uri=cfg.mlflow_tracking_uri)
+    mv = client.get_model_version_by_alias(cfg.model_name, cfg.model_alias)
+    assert str(mv.version) == "1"
+
+
+def test_register_model_skips_promotion_when_gate_fails(tmp_path):
+    import pytest
+    from mlflow import MlflowClient
+    from mlflow.exceptions import MlflowException
+
+    from churn.orchestration.steps.register_model import register_model
+
+    model_path, metrics_path, train_path = _build_artifacts(tmp_path)
+    cfg = _reg_cfg(tmp_path, min_roc_auc=0.99)
+    result = register_model(model_path, metrics_path, train_path, cfg)
+
+    assert result["promoted"] is False
+    assert result["version"] == "1"
+    client = MlflowClient(tracking_uri=cfg.mlflow_tracking_uri)
+    # version registered, but no production alias set
+    assert client.get_model_version(cfg.model_name, "1") is not None
+    with pytest.raises(MlflowException):
+        client.get_model_version_by_alias(cfg.model_name, cfg.model_alias)
