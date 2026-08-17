@@ -1,214 +1,100 @@
-# Variante TensorFlow do modelo de churn — Design (Marco 8)
+# TensorFlow vs scikit-learn — Design do documento (Marco 8)
 
-> Entregável do teste técnico Bulla (ML Engineer / MLOps). Documenta a variante
-> **TensorFlow/Keras** do modelo entregue (regressão logística sklearn) com **prova
-> empírica de equivalência**, sem trocar o modelo de produção.
+> Entregável do teste técnico Bulla (ML Engineer / MLOps). Documenta, de forma honesta,
+> **quando e por que** TensorFlow valeria mais que scikit-learn — e por que, para este
+> problema de churn, o sklearn é a escolha certa.
 
 ## 1. Objetivo
 
-O teste técnico menciona TensorFlow. O modelo entregue é uma regressão logística do
-scikit-learn (decisão da spec principal §7). Este marco fecha a lacuna **documentando**
-como esse mesmo modelo seria construído em TF/Keras e **provando** que são o mesmo
-modelo — sem promover o TF a dependência de primeira classe nem tocar no que roda em
-produção.
+O teste menciona TensorFlow. O modelo entregue é uma regressão logística do scikit-learn
+(decisão da spec principal §7). Este marco entrega **um único documento**
+(`docs/tensorflow_variant.md`) que:
 
-A equivalência é exata em teoria: uma regressão logística **é** uma única camada densa
-com ativação sigmoide treinada com perda de entropia cruzada binária. A prova é
-empírica: treinar as duas versões sobre o mesmo `X` e mostrar que concordam.
+1. reconhece a equivalência (uma regressão logística é uma rede de uma camada densa
+   sigmoide — dá pra escrever em Keras trivialmente);
+2. lista, de forma objetiva, os **pontos fortes do TensorFlow frente ao sklearn**;
+3. é honesto sobre o **trade-off neste caso**: churn tabular (~10k linhas, sinal
+   majoritariamente linear) é território onde o sklearn ganha — o TF só passa a valer
+   quando o problema cresce em escala, modalidade ou exigência de produção.
 
-**Restrição central:** `make ci` e `make test` seguem **TF-free e verdes**. O
-TensorFlow é um extra opcional; o teste de paridade dá skip quando ele está ausente.
-A prova roda sob demanda em um comando (`make tf-variant`).
+**Sem código executável.** Nada de exemplo Keras, teste de paridade, dependência
+opcional ou make target. É documentação — o objetivo é demonstrar critério de
+engenharia (saber escolher a ferramenta), não construir a variante.
 
-## 2. Mapeamento Vertex AI ↔ este repo
+## 2. Escopo
 
-| Vertex AI / GCP | Equivalente neste repo | Gap honesto |
-|---|---|---|
-| Vertex Training com container TF (treina Keras nativamente) | Variante Keras **documentada + verificável** (`examples/tensorflow_variant.py`) | Roda localmente sob demanda, não como job de treino gerenciado |
-| Model Registry (framework-agnóstico: sklearn, TF, XGBoost) | MLflow já registra o modelo sklearn; o doc mostra que trocar pra `mlflow.tensorflow` seria simétrico | O flavor TF é **explicado, não executado** |
-| Prediction container (serving agnóstico de framework) | A mesma API FastAPI serviria o modelo TF sem mudança de contrato | Não empacotamos um container servindo TF |
+Um arquivo: `docs/tensorflow_variant.md`. Nenhum outro artefato. `pyproject.toml`,
+`Makefile`, `tests/` e `examples/` **não** são tocados. `make ci`/`make test` seguem
+idênticos.
 
-Mensagem: no Vertex, trocar sklearn por TF é trocar o container de treino e o flavor do
-registry — o resto do MLOps (pipeline, registry, serving, monitoring) não muda. Este
-marco demonstra isso localmente com a peça central (o modelo) de fato treinada e
-verificada.
+## 3. Conteúdo do documento
 
-## 3. A equivalência (o que muda e o que é reusado)
+Seções propostas (prosa curta e direta, não academic):
 
-O pipeline de treino atual (`churn.training.pipeline.build_pipeline`) é um `Pipeline`
-sklearn de três passos:
+1. **Contexto e decisão.** O modelo entregue é uma LogReg sklearn. Por quê: dataset
+   tabular pequeno, sinal linear, interpretabilidade e simplicidade > capacidade. Este
+   doc explica quando a balança viraria pro TensorFlow.
 
-```
-features (ChurnFeatureBuilder) -> preprocess (ColumnTransformer) -> model (LogisticRegression)
-```
+2. **A equivalência.** Uma regressão logística é literalmente uma rede neural de uma
+   camada: `Dense(1, activation="sigmoid")` treinada com `binary_crossentropy`. Ou
+   seja, migrar o *modelo atual* pra TF é trivial e não traria ganho — o ganho do TF
+   aparece nos modelos que o sklearn **não** faz.
 
-**Só o último passo muda.** A variante TF reusa `features` + `preprocess` sem alteração
-e troca `LogisticRegression` por uma camada `Dense(1, activation="sigmoid")` treinada
-com `binary_crossentropy`. Isso garante que a comparação isola o classificador: mesmas
-features, mesmo scaling, mesmo one-hot, mesmo split.
+3. **Pontos fortes do TensorFlow frente ao sklearn.** O núcleo do documento. Cada item
+   com uma frase de "quando isso importa":
+   - **Deep learning de verdade** — redes profundas, embeddings, camadas convolucionais
+     e recorrentes, atenção. O sklearn não faz aprendizado profundo; para texto, imagem,
+     sequências ou features de altíssima cardinalidade, é TF (ou PyTorch).
+   - **Escala além da memória** — `tf.data` faz streaming de datasets que não cabem em
+     RAM; treino distribuído (multi-GPU/TPU, multi-nó) via `tf.distribute`. O sklearn é
+     single-node, in-memory.
+   - **Aceleração por hardware** — GPU/TPU nativo. Para modelos grandes, ordens de
+     magnitude mais rápido.
+   - **Diferenciação automática e customização** — losses, camadas e loops de treino
+     customizados com autodiff. O sklearn expõe estimadores fechados; o TF deixa você
+     definir o objetivo.
+   - **Aprendizado incremental / online** — treino por mini-batches permite atualização
+     contínua com dados novos (retraining incremental), útil quando o churn deriva no
+     tempo. A maioria dos estimadores sklearn re-treina do zero.
+   - **Ecossistema de produção** — SavedModel + TensorFlow Serving (serving de alta
+     performance), TFLite (mobile/edge), TF.js (browser), TFX (pipelines de produção com
+     validação de dados e análise de modelo). O caminho do sklearn pra produção é mais
+     manual.
+   - **Integração com Vertex AI** — o Vertex treina containers TF nativamente, tem
+     AutoML e serviços gerenciados afinados no ecossistema TF. Amarra ao tema do teste.
 
-Como obter o `X` transformado reusando o código existente: cortar a cabeça do pipeline
-sklearn já ajustado.
+4. **O trade-off neste caso (honestidade).** Para *este* problema — churn tabular,
+   volume pequeno, forte baseline linear — o TF seria overkill: mais código, mais
+   dependências (CUDA, versões), treino mais lento sem ganho de acurácia, e perda de
+   interpretabilidade. A regra prática: **comece simples; migre pro TF quando** (a) o
+   sinal for claramente não-linear e complexo, (b) os dados não couberem em memória, (c)
+   a modalidade for texto/imagem/sequência, ou (d) o serving exigir edge/mobile/altíssima
+   escala.
 
-```python
-sk_pipeline = build_pipeline(random_state=cfg.random_state, n_age_bins=cfg.n_age_bins)
-sk_pipeline.fit(X_train, y_train)          # ajusta features + preprocess + LogReg
-preproc = sk_pipeline[:-1]                  # sub-pipeline já ajustado: features + preprocess
-X_train_t = preproc.transform(X_train)
-X_test_t = preproc.transform(X_test)
-```
+5. **Como a migração se encaixaria no MLOps existente.** Nota curta: o resto do pipeline
+   é agnóstico de framework — o MLflow registra modelos TF (`mlflow.tensorflow`) como
+   registra sklearn, a mesma API FastAPI serviria, e no KFP só o step de treino trocaria.
+   Trocar o modelo não obriga a reescrever o MLOps. (Explicado, não executado.)
 
-**Gotcha (densificação):** o `OneHotEncoder` do `ColumnTransformer` produz saída
-**esparsa** por padrão; Keras precisa de denso. Densificar após o transform:
+## 4. Verificação
 
-```python
-import scipy.sparse as sp
-if sp.issparse(X_train_t):
-    X_train_t = X_train_t.toarray()
-    X_test_t = X_test_t.toarray()
-```
+Documento não tem teste automatizado. A verificação é editorial:
 
-**Espelhar `class_weight="balanced"`:** o LogReg usa pesos balanceados; para paridade
-justa, o Keras recebe os mesmos pesos via `class_weight` no `.fit`, computados como o
-sklearn faz (`n_samples / (n_classes * bincount(y))`):
+1. **Precisão técnica** — cada ponto forte do TF é factualmente correto e não
+   caricato; cada afirmação sobre o sklearn é justa (não um espantalho).
+2. **Honestidade** — o doc conclui que o sklearn é a escolha certa *aqui*, não vende o
+   TF gratuitamente. Um avaliador deve ver critério, não hype.
+3. **Consistência com o repo** — as referências (LogReg entregue, MLflow, FastAPI, KFP,
+   Vertex) batem com o que está implementado nos marcos anteriores.
+4. **Idioma** — o doc em si segue a convenção do projeto (README/docs em português;
+   identificadores e trechos de código em inglês).
 
-```python
-from sklearn.utils.class_weight import compute_class_weight
-classes = np.array([0, 1])
-weights = compute_class_weight("balanced", classes=classes, y=y_train)
-class_weight = {0: weights[0], 1: weights[1]}
-```
+## 5. Fora de escopo (YAGNI)
 
-**Determinismo:** `keras.utils.set_random_seed(cfg.random_state)` antes de construir o
-modelo, para a prova ser reproduzível.
-
-### 3.1 O modelo Keras
-
-Uma única camada densa, sem camadas ocultas — é literalmente a regressão logística:
-
-```python
-model = keras.Sequential([
-    keras.layers.Input(shape=(X_train_t.shape[1],)),
-    keras.layers.Dense(1, activation="sigmoid"),
-])
-model.compile(optimizer="adam", loss="binary_crossentropy")
-model.fit(
-    X_train_t, y_train,
-    epochs=100, batch_size=64,
-    class_weight=class_weight, verbose=0,
-)
-proba_keras = model.predict(X_test_t, verbose=0).ravel()
-```
-
-Os hiperparâmetros de otimização (optimizer, epochs, batch_size) são livres: o objetivo
-é convergir a fronteira de decisão perto da do LBFGS, não replicar o otimizador. A
-prova mede concordância nas **predições**, não nos pesos (LBFGS vs Adam nunca chegam
-aos mesmos pesos).
-
-## 4. Artefatos
-
-Quatro artefatos + um aditivo no Makefile. Princípio: **reusar** o preprocessing
-existente; **isolar** o TF atrás de um extra opcional.
-
-### 4.1 `pyproject.toml` (aditivo)
-
-```toml
-[project.optional-dependencies]
-tf = ["tensorflow-cpu>=2.16"]
-```
-
-`tensorflow-cpu` (não `tensorflow` cheio): a prova roda em CPU, sem CUDA, e o pacote é
-menor. Keras 3 já vem embutido no TF ≥ 2.16 (`from tensorflow import keras`). O install
-default (`uv sync`) e o `make ci` **não** instalam isso — só `uv sync --extra tf`.
-
-### 4.2 `examples/tensorflow_variant.py`
-
-Script rodável (não módulo do pacote — é um exemplo). Estrutura:
-
-1. Carrega os dados e faz o **mesmo split** do `train.py` (`load_raw`, `INPUT_COLUMNS`,
-   `df["turnover"]`, `train_test_split` com `test_size`/`random_state`/`stratify=y` de
-   `Settings`).
-2. Ajusta `build_pipeline(...)` completo → obtém `proba_sklearn` e `auc_sklearn` no teste.
-3. Corta a cabeça (`sk_pipeline[:-1]`), transforma e densifica → `X_train_t`, `X_test_t`.
-4. Treina o Keras `Dense(1, sigmoid)` com `class_weight` balanceado → `proba_keras`.
-5. Calcula `auc_keras` (via `roc_auc_score`) e `pearson(proba_sklearn, proba_keras)`.
-6. Imprime os três números e um veredito de paridade legível.
-
-Expõe uma função reutilizável (ex.: `run_parity()`) que retorna um dict com
-`auc_sklearn`, `auc_keras`, `auc_gap`, `pearson` — para o teste importar sem duplicar
-lógica. O `if __name__ == "__main__"` chama e imprime.
-
-### 4.3 `tests/test_tensorflow_variant.py`
-
-```python
-import pytest
-
-tf = pytest.importorskip("tensorflow")  # skipa o módulo inteiro se o TF não estiver instalado
-```
-
-Um teste que chama `run_parity()` e afirma:
-
-- `abs(result["auc_keras"] - result["auc_sklearn"]) < 0.02`
-- `result["pearson"] > 0.98`
-
-Como o `importorskip` está no topo, `make test`/`make ci` sem o extra `tf` **coletam 0
-testes deste arquivo** (skip limpo, verde). Com o extra instalado, o teste roda e prova
-a paridade de verdade.
-
-### 4.4 `docs/tensorflow_variant.md`
-
-O documento voltado ao avaliador. Seções:
-
-1. **Decisão e restrição** — por que sklearn é o modelo entregue e por que o TF é
-   documentado + verificável, não promovido a produção.
-2. **Equivalência matemática** — LogReg = camada densa sigmoide + BCE; a fórmula e a
-   intuição.
-3. **O que muda** — só a cabeça classificadora; features/split/scaling reusados
-   (referência ao `build_pipeline()[:-1]`).
-4. **A prova** — como rodar (`make tf-variant`), o que ela afirma (gap de AUC < 0.02 e
-   correlação de Pearson > 0.98) e os números observados na execução real (preenchidos
-   com a saída de verdade, não inventados).
-5. **Como plugaria no resto do MLOps** — `mlflow.tensorflow` no lugar de
-   `mlflow.sklearn`; a mesma API FastAPI serve o modelo; no KFP só o step `train_model`
-   troca. Explicado, não executado.
-6. **Mapeamento Vertex** — a tabela da §2 deste design.
-
-### 4.5 `Makefile` (aditivo)
-
-```make
-tf-variant: ## Instala o extra TF e roda a prova de paridade sklearn vs Keras (sob demanda)
-	uv sync --extra tf
-	uv run python examples/tensorflow_variant.py
-	uv run pytest tests/test_tensorflow_variant.py -v
-```
-
-`.PHONY` ganha `tf-variant`. Reproduz a prova em um comando.
-
-## 5. Verificação (honesta)
-
-A prova é operacional, em camadas:
-
-1. **`make test` verde sem o extra TF** — confirma que o teste de paridade dá skip
-   limpo e não quebra a suíte TF-free (o CI segue idêntico).
-2. **`make tf-variant` verde com o extra TF** — instala `tensorflow-cpu`, roda o
-   exemplo (imprime os números reais) e o teste (afirma as tolerâncias). Esta é a prova
-   de que a equivalência se sustenta empiricamente.
-3. **Números reais no doc** — os valores de AUC e Pearson em `tensorflow_variant.md` são
-   os observados na execução de verdade, colados da saída — não estimativas.
-
-Ponto a confirmar na implementação: que o `tensorflow-cpu` instala de fato no ambiente
-(Python 3.12, Linux) e que os números batem as tolerâncias. Se a correlação ficar
-abaixo de 0.98 ou o gap de AUC acima de 0.02, ajustar epochs/batch_size (não afrouxar a
-tolerância sem justificativa) até convergir — a fronteira de decisão de uma LogReg bem
-condicionada é reproduzível por SGD/Adam com folga.
-
-## 6. Fora de escopo (YAGNI)
-
-- Integrar o TF ao pipeline de treino, ao DAG KFP ou ao serving de produção (continuam
-  sklearn).
-- Log real no MLflow via `mlflow.tensorflow` (explicado no doc, não executado).
-- GPU / CUDA (a prova roda em CPU).
-- Tentar bater os pesos entre LBFGS e Adam (a prova é sobre predições, não parâmetros).
-- Adicionar o TF ao `make ci` ou ao workflow do GitHub Actions (a suíte segue TF-free).
-- Tuning de arquitetura (camadas ocultas, regularização) — descaracterizaria a
-  equivalência com a regressão logística.
+- Exemplo Keras executável (`examples/tensorflow_variant.py`).
+- Teste de paridade (`tests/test_tensorflow_variant.py`).
+- Dependência opcional `tf` no `pyproject.toml`.
+- Alvo `make tf-variant`.
+- Qualquer prova empírica de equivalência (AUC/correlação). O documento **afirma** a
+  equivalência teórica; não a mede.
+- Treinar, registrar ou servir um modelo TF de fato.
