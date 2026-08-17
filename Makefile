@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup test lint format train serve feast-materialize docker-build docker-run
+.PHONY: help setup test lint format train pipeline serve feast-materialize docker-build docker-run
 
 help: ## Lista os targets disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -22,6 +22,9 @@ format: ## Formata com ruff
 
 train: ## Treina o modelo e registra no MLflow (backend SQLite local)
 	uv run python -m churn.training.train
+
+pipeline: ## Roda o DAG de treino KFP local ponta a ponta (prepare -> split -> train -> evaluate -> register)
+	uv run python -m churn.orchestration.dag
 
 feast-materialize: ## Popula e materializa a feature store Feast (offline -> online)
 	uv run python -m churn.feature_store.materialize

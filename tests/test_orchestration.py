@@ -158,3 +158,27 @@ def test_register_model_skips_promotion_when_gate_fails(tmp_path):
     assert client.get_model_version(cfg.model_name, "1") is not None
     with pytest.raises(MlflowException):
         client.get_model_version_by_alias(cfg.model_name, cfg.model_alias)
+
+
+def test_pipeline_end_to_end(tmp_path):
+    from mlflow import MlflowClient
+
+    from churn.config import Settings
+    from churn.orchestration.dag import run_local
+
+    cfg = Settings(
+        data_path=CSV_PATH,
+        mlflow_tracking_uri=f"sqlite:///{tmp_path}/mlflow.db",
+        mlflow_experiment="churn-e2e",
+        model_name="churn-model-e2e",
+        model_alias="production",
+        min_roc_auc=0.5,
+    )
+
+    run = run_local(cfg)
+    assert run.state.name == "FINAL"
+
+    # the DAG registered a version and promoted it (gate passes at 0.5)
+    client = MlflowClient(tracking_uri=cfg.mlflow_tracking_uri)
+    mv = client.get_model_version_by_alias(cfg.model_name, cfg.model_alias)
+    assert str(mv.version) == "1"
