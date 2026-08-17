@@ -36,3 +36,6 @@ reports/
 
 # Feast local artifacts (generated)
 feature_repo/
+
+# KFP local pipeline run artifacts (generated)
+local_outputs/

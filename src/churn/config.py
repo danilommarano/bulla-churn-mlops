@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     random_state: int = 42
     test_size: float = 0.2
     n_age_bins: int = 5
+    min_roc_auc: float = 0.70  # promotion gate: register_model moves @production only if roc_auc >= this
 
     # MLflow (local, no server) + model registry
     mlflow_tracking_uri: str = "sqlite:///mlflow.db"
