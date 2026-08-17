@@ -22,6 +22,8 @@ def train(cfg: Settings = settings) -> dict:
     pipeline.fit(X_train, y_train)
     metrics = evaluate(pipeline, X_test, y_test)
 
+    # This quick-run entrypoint always promotes. The min_roc_auc quality gate lives in
+    # the KFP register_model step (make pipeline), which is the governed promotion path.
     result = log_and_register(pipeline, X_train, metrics, cfg, promote=True)
     return {
         "run_id": result["run_id"],
