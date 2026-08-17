@@ -35,12 +35,16 @@ def run(cfg: Settings = settings, *, simulate: bool = False) -> int:
         f"[{status}] drift_share={summary['drift_share']:.3f} "
         f"threshold={cfg.drift_threshold} drifted_columns={summary['drifted_columns']}"
     )
-    print(f"report: {cfg.monitoring_report_path}  metrics: {cfg.monitoring_metrics_path}")
+    print(
+        f"report: {cfg.monitoring_report_path}  metrics: {cfg.monitoring_metrics_path}"
+    )
     return 0 if passed else 1
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Churn model monitoring (drift + quality).")
+    parser = argparse.ArgumentParser(
+        description="Churn model monitoring (drift + quality)."
+    )
     parser.add_argument(
         "--simulate-drift",
         action="store_true",

@@ -39,7 +39,10 @@ def build_pipeline(random_state: int = 42, n_age_bins: int = 5) -> Pipeline:
     )
     return Pipeline(
         [
-            ("features", ChurnFeatureBuilder(n_age_bins=n_age_bins, random_state=random_state)),
+            (
+                "features",
+                ChurnFeatureBuilder(n_age_bins=n_age_bins, random_state=random_state),
+            ),
             ("preprocess", preprocess),
             (
                 "model",

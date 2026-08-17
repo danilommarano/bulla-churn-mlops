@@ -40,6 +40,14 @@ def test_pipeline_survives_persist_roundtrip():
 def test_pipeline_is_reproducible():
     """Same seed -> same predictions (bug #6)."""
     X_train, X_test, y_train, _ = _split()
-    a = build_pipeline(random_state=42).fit(X_train, y_train).predict_proba(X_test)[:, 1]
-    b = build_pipeline(random_state=42).fit(X_train, y_train).predict_proba(X_test)[:, 1]
+    a = (
+        build_pipeline(random_state=42)
+        .fit(X_train, y_train)
+        .predict_proba(X_test)[:, 1]
+    )
+    b = (
+        build_pipeline(random_state=42)
+        .fit(X_train, y_train)
+        .predict_proba(X_test)[:, 1]
+    )
     assert np.allclose(a, b)

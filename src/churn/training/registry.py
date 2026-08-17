@@ -37,7 +37,9 @@ def log_and_register(
                 "n_input_features": len(INPUT_COLUMNS),
             }
         )
-        mlflow.log_metrics({k: v for k, v in metrics.items() if k != "confusion_matrix"})
+        mlflow.log_metrics(
+            {k: v for k, v in metrics.items() if k != "confusion_matrix"}
+        )
         signature = infer_signature(X_sample, pipeline.predict(X_sample))
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")  # mute pip-version + int-column hints
@@ -51,9 +53,9 @@ def log_and_register(
             )
         version = str(info.registered_model_version)
         if promote:
-            MlflowClient(tracking_uri=cfg.mlflow_tracking_uri).set_registered_model_alias(
-                cfg.model_name, cfg.model_alias, version
-            )
+            MlflowClient(
+                tracking_uri=cfg.mlflow_tracking_uri
+            ).set_registered_model_alias(cfg.model_name, cfg.model_alias, version)
         run_id = run.info.run_id
 
     return {"run_id": run_id, "version": version, "promoted": promote}

@@ -46,7 +46,10 @@ def health() -> dict:
 
 
 @app.post("/predict", response_model=list[Prediction])
-def predict(records: list[CustomerFeatures], model=Depends(get_model)) -> list[Prediction]:  # noqa: B008
+def predict(
+    records: list[CustomerFeatures],
+    model=Depends(get_model),  # noqa: B008
+) -> list[Prediction]:
     if not records:
         return []
     frame = pd.DataFrame([r.model_dump(by_alias=True) for r in records])[INPUT_COLUMNS]
@@ -54,7 +57,9 @@ def predict(records: list[CustomerFeatures], model=Depends(get_model)) -> list[P
     preds = model.predict(frame)
     scores = retention_score(proba[:, 0])  # probability of STAYING -> 0..10
     return [
-        Prediction(turnover_pred=int(pred), prob_churn=float(churn), score_retencao=int(score))
+        Prediction(
+            turnover_pred=int(pred), prob_churn=float(churn), score_retencao=int(score)
+        )
         for pred, churn, score in zip(preds, proba[:, 1], scores)
     ]
 

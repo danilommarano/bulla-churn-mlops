@@ -10,4 +10,8 @@ def test_load_raw_validates_and_loads():
     assert len(df) == 10000
     assert "turnover" in df.columns
     # the schema enforces the domain: no geography outside the 3 known ones
-    assert set(df["Geography"].unique()) <= {"Minas Gerais", "Rio de Janeiro", "Sao Paulo"}
+    assert set(df["Geography"].unique()) <= {
+        "Minas Gerais",
+        "Rio de Janeiro",
+        "Sao Paulo",
+    }

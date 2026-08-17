@@ -17,7 +17,9 @@ def register_model(
 
     Returns run_id, version, promoted, roc_auc.
     """
-    pipeline = joblib.load(model_path)  # trusted: artifact written by train_model step in this same pipeline
+    pipeline = joblib.load(
+        model_path
+    )  # trusted: artifact written by train_model step in this same pipeline
     with open(metrics_path) as f:
         metrics = json.load(f)
     X_sample = pd.read_parquet(train_path)[INPUT_COLUMNS].head(5)

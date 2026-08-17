@@ -40,7 +40,9 @@ def train_model_op(
 
 
 @dsl.component
-def evaluate_model_op(model: Input[Model], test_set: Input[Dataset], metrics: Output[Metrics]):
+def evaluate_model_op(
+    model: Input[Model], test_set: Input[Dataset], metrics: Output[Metrics]
+):
     from churn.orchestration.steps.evaluate_model import evaluate_model
 
     result = evaluate_model(model.path, test_set.path, metrics.path)
@@ -99,9 +101,13 @@ def churn_training_pipeline(
         dataset=prep.outputs["output"], test_size=test_size, random_state=random_state
     )
     trained = train_model_op(
-        train_set=split.outputs["train"], random_state=random_state, n_age_bins=n_age_bins
+        train_set=split.outputs["train"],
+        random_state=random_state,
+        n_age_bins=n_age_bins,
     )
-    ev = evaluate_model_op(model=trained.outputs["model"], test_set=split.outputs["test"])
+    ev = evaluate_model_op(
+        model=trained.outputs["model"], test_set=split.outputs["test"]
+    )
     register_model_op(
         model=trained.outputs["model"],
         metrics=ev.outputs["metrics"],
