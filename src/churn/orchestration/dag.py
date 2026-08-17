@@ -63,7 +63,10 @@ def register_model_op(
     min_roc_auc: float,
 ):
     from churn.config import Settings
-    from churn.orchestration.steps.register_model import register_model
+    from churn.orchestration.steps.register_model import (
+        register_model,
+        require_promotion,
+    )
 
     cfg = Settings(
         mlflow_tracking_uri=mlflow_tracking_uri,
@@ -75,7 +78,8 @@ def register_model_op(
         n_age_bins=n_age_bins,
         min_roc_auc=min_roc_auc,
     )
-    register_model(model.path, metrics.path, train_set.path, cfg)
+    result = register_model(model.path, metrics.path, train_set.path, cfg)
+    require_promotion(result)
 
 
 @dsl.pipeline(name="churn-training-pipeline")

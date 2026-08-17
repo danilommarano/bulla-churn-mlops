@@ -1,8 +1,10 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 
 from churn.features.builder import INPUT_COLUMNS
+from churn.orchestration.steps.register_model import ModelGateError, require_promotion
 
 CSV_PATH = str(Path(__file__).resolve().parents[1] / "Customer-Churn-Records.csv")
 
@@ -182,3 +184,13 @@ def test_pipeline_end_to_end(tmp_path):
     client = MlflowClient(tracking_uri=cfg.mlflow_tracking_uri)
     mv = client.get_model_version_by_alias(cfg.model_name, cfg.model_alias)
     assert str(mv.version) == "1"
+
+
+def test_require_promotion_raises_when_gate_rejects():
+    with pytest.raises(ModelGateError):
+        require_promotion({"promoted": False, "roc_auc": 0.5, "run_id": "r", "version": 1})
+
+
+def test_require_promotion_passes_when_promoted():
+    # Must not raise; returns None.
+    assert require_promotion({"promoted": True, "roc_auc": 0.8, "run_id": "r", "version": 1}) is None

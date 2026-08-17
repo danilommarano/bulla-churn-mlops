@@ -26,3 +26,21 @@ def register_model(
     promote = roc_auc >= cfg.min_roc_auc
     result = log_and_register(pipeline, X_sample, metrics, cfg, promote=promote)
     return {**result, "roc_auc": roc_auc}
+
+
+class ModelGateError(RuntimeError):
+    """Raised when the trained model fails the quality gate (roc_auc below min_roc_auc)."""
+
+
+def require_promotion(result: dict) -> None:
+    """Fail the pipeline if the model was not promoted (quality gate rejected it).
+
+    The pure `register_model` step reports promotion as data; the orchestration layer
+    turns a rejection into a hard failure so CI (and Vertex-style model validation)
+    fails the run instead of silently shipping a bad model.
+    """
+    if not result["promoted"]:
+        raise ModelGateError(
+            f"Quality gate rejected the model: roc_auc={result['roc_auc']:.4f} "
+            "below min_roc_auc; not promoted to @production."
+        )
