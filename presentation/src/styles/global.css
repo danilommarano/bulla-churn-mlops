@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #1a1a1a;
-  --muted: #6b7280;
-  --accent: #2563eb;
-  --bg: #ffffff;
+  --bg: #f0eee6; /* warm paper — evita branco estourado */
+  --ink: #1f1e1c; /* preto quente */
+  --muted: #6f6d64; /* cinza quente */
+  --accent: #c15f3c; /* argila/coral */
+  --panel: #faf9f5; /* cartão suave sobre o creme */
 }
 
 html {
@@ -18,8 +19,28 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Deck: um slide por vez, com crossfade suave (sem scroll entre slides). */
+.deck {
+  transition: opacity 160ms ease;
+}
+.deck.is-fading {
+  opacity: 0;
+}
+/* Todos os slides ficam no layout (empilhados) para componentes que precisam
+   medir o container no load (ex.: Mermaid via getBBox); só o ativo é visível.
+   visibility:hidden mantém a caixa mensurável mas fora do hit-test e da pintura. */
+.slide {
+  visibility: hidden;
+}
+.slide.is-active {
+  visibility: visible;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .deck {
+    transition: none;
   }
 }

@@ -44,3 +44,6 @@ local_outputs/
 presentation/node_modules/
 presentation/dist/
 presentation/.astro/
+
+# Playwright MCP screenshots/snapshots (dev-only)
+.playwright-mcp/

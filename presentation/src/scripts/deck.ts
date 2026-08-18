@@ -1,9 +1,10 @@
 import { clampIndex, nextIndex } from "./deck.mjs";
 
 function initDeck() {
+  const deck = document.querySelector<HTMLElement>(".deck");
   const slides = Array.from(document.querySelectorAll<HTMLElement>(".slide"));
   const total = slides.length;
-  if (total === 0) return;
+  if (!deck || total === 0) return;
 
   const dotsWrap = document.getElementById("deck-dots");
   const counter = document.getElementById("deck-counter");
@@ -22,19 +23,39 @@ function initDeck() {
     });
   }
 
+  function show(i: number) {
+    slides.forEach((s, idx) => s.classList.toggle("is-active", idx === i));
+  }
+
   function paint() {
     if (counter) counter.textContent = `${current + 1} / ${total}`;
     dotsWrap?.querySelectorAll(".deck-dot").forEach((d, i) => {
       d.classList.toggle("bg-black/20", i !== current);
       d.classList.toggle("bg-[var(--accent)]", i === current);
     });
-    location.hash = `slide-${current + 1}`;
+    // hash sincronizado sem empurrar histórico nem disparar hashchange
+    if (location.hash !== `#slide-${current + 1}`) {
+      history.replaceState(null, "", `#slide-${current + 1}`);
+    }
   }
 
+  // troca de slide com crossfade: fade-out -> troca -> fade-in
   function go(i: number) {
-    current = clampIndex(i, total);
-    slides[current].scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
-    paint();
+    const target = clampIndex(i, total);
+    if (target === current && slides[target].classList.contains("is-active")) return;
+    if (reduce) {
+      current = target;
+      show(current);
+      paint();
+      return;
+    }
+    deck!.classList.add("is-fading");
+    window.setTimeout(() => {
+      current = target;
+      show(current);
+      paint();
+      requestAnimationFrame(() => deck!.classList.remove("is-fading"));
+    }, 160);
   }
 
   function toggleNotes() {
@@ -74,10 +95,17 @@ function initDeck() {
     }
   });
 
-  // deep-link inicial (#slide-7)
+  // âncoras internas (#slide-7 do mapa Vertex) navegam via fade
+  window.addEventListener("hashchange", () => {
+    const m = location.hash.match(/slide-(\d+)/);
+    if (m) go(clampIndex(Number(m[1]) - 1, total));
+  });
+
+  // deep-link inicial (#slide-7) — render instantâneo, sem fade
   const m = location.hash.match(/slide-(\d+)/);
-  if (m) current = clampIndex(Number(m[1]) - 1, total);
-  go(current);
+  current = m ? clampIndex(Number(m[1]) - 1, total) : 0;
+  show(current);
+  paint();
 }
 
 if (document.readyState !== "loading") initDeck();

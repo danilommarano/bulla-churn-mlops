@@ -3,20 +3,36 @@ interface Props {
   chart?: string;
 }
 const defaultChart = `flowchart LR
-  A[CSV validado<br/>Pandera] --> B[Split<br/>stratify+seed]
-  B --> C[Feast<br/>feature sem leakage]
-  C --> D[Pipeline sklearn<br/>fit no treino]
-  D --> E[MLflow<br/>tracking + registry]
-  E -->|gate roc_auc>=0.70| F[@production]
-  F --> G[FastAPI /predict<br/>score 0-10]
-  G --> H[Evidently<br/>drift + quality gate]
-  H -->|exit != 0| B`;
+  A["CSV validado<br/>Pandera"] --> B["Split<br/>stratify+seed"]
+  B --> C["Feast<br/>feature sem leakage"]
+  C --> D["Pipeline sklearn<br/>fit no treino"]
+  D --> E["MLflow<br/>tracking + registry"]
+  E -->|"gate roc_auc ≥ 0.70"| F["@production"]
+  F --> G["FastAPI /predict<br/>score 0–10"]
+  G --> H["Evidently<br/>drift + quality gate"]
+  H -->|"exit ≠ 0"| B`;
 const { chart = defaultChart } = Astro.props;
 ---
 
 <div class="mermaid-wrap flex justify-center">
-  <pre class="mermaid" set:html={chart} />
+  <pre class="mermaid">{chart}</pre>
 </div>
+
+<style is:global>
+  /* O <pre.mermaid> é flex-item shrink-to-fit; sem width:100% ele colapsa e o
+     svg (width:100%) resolve contra uma caixa mínima. Damos largura aos dois. */
+  .mermaid-wrap .mermaid {
+    width: 100%;
+    margin: 0;
+  }
+  .mermaid-wrap svg {
+    display: block;
+    margin: 0 auto;
+    width: 100% !important;
+    max-width: 960px !important;
+    height: auto !important;
+  }
+</style>
 
 <script>
   import mermaid from "mermaid";

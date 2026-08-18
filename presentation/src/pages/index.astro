@@ -16,18 +16,48 @@ import mlflowRuns from "../assets/mlflow-runs.png";
 import evidentlyDrift from "../assets/evidently-drift.png";
 
 const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
+
+// Detalhe do modelo recebido (slide 3) — fatos extraídos do código-fonte.
+const modelFacts = [
+  { k: "Algoritmo", v: "Regressão logística", d: 'class_weight="balanced" · max_iter=500 · seed 42' },
+  { k: "Alvo", v: "turnover (0/1)", d: "base ~20% churn — problema desbalanceado" },
+  { k: "Entrada", v: "12 colunas", d: "Customer-Churn-Records.csv — numéricas + Geography / Gender / Card Type" },
+  { k: "Features derivadas", v: "3 engenheiradas", d: "balance_per_product · geography_churn_rate · age_bucket" },
+];
 ---
 
 <Base>
   <Deck>
-    <Slide meta={meta(1)} />
+    <Slide meta={meta(1)} active>
+      <p class="text-base text-[var(--muted)]">
+        Danilo Matrangolo Marano ·
+        <a class="text-[var(--accent)] underline-offset-4 hover:underline" href="mailto:danilo.m.marano@gmail.com">
+          danilo.m.marano@gmail.com
+        </a>
+      </p>
+    </Slide>
     <Slide meta={meta(2)} />
-    <Slide meta={meta(3)}><VertexOssMap /></Slide>
-    <Slide meta={meta(4)} />
-    <Slide meta={meta(5)}><CodeDiff /></Slide>
-    <Slide meta={meta(6)}><Mermaid /></Slide>
-    <Slide meta={meta(7)}><ModelPlayground /></Slide>
-    <Slide meta={meta(8)}>
+    <Slide meta={meta(3)}>
+      <div class="mx-auto grid max-w-3xl gap-4 text-left sm:grid-cols-2">
+        {modelFacts.map((f) => (
+          <div class="rounded-xl border border-black/10 bg-[var(--panel)] p-5">
+            <p class="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">{f.k}</p>
+            <p class="mt-1 text-lg font-medium">{f.v}</p>
+            <p class="mt-1 text-sm text-[var(--muted)]">{f.d}</p>
+          </div>
+        ))}
+      </div>
+      <p class="mt-6 text-sm text-[var(--muted)]">
+        Um único <span class="font-medium text-[var(--ink)]">Pipeline sklearn</span> encapsula
+        pré-processo + modelo: o mesmo objeto treina, versiona e prediz — sem re-fit na inferência.
+      </p>
+    </Slide>
+    <Slide meta={meta(4)}><VertexOssMap /></Slide>
+    <Slide meta={meta(5)} />
+    <Slide meta={meta(6)}><CodeDiff /></Slide>
+    <Slide meta={meta(7)}><Mermaid /></Slide>
+    <Slide meta={meta(8)}><ModelPlayground /></Slide>
+    <Slide meta={meta(9)}>
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <MetricCard label="ROC AUC" value={metrics.roc_auc.toFixed(3)} note="separa bem" />
         <MetricCard label="Recall" value={metrics.recall.toFixed(3)} note="o que importa" />
@@ -38,7 +68,7 @@ const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
         <ConfusionMatrix />
       </div>
     </Slide>
-    <Slide meta={meta(9)}>
+    <Slide meta={meta(10)}>
       <div class="grid gap-6 text-left md:grid-cols-2">
         <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
           <p class="text-sm font-semibold text-emerald-700">make monitor — holdout saudável</p>
@@ -53,11 +83,11 @@ const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
       </div>
       <Image src={evidentlyDrift} alt="Relatório de drift do Evidently" class="mx-auto mt-6 max-h-64 w-auto rounded-lg border" />
     </Slide>
-    <Slide meta={meta(10)}>
+    <Slide meta={meta(11)}>
       <Timeline />
       <Image src={mlflowRuns} alt="Runs registradas no MLflow" class="mx-auto mt-6 max-h-64 w-auto rounded-lg border" />
     </Slide>
-    <Slide meta={meta(11)} />
     <Slide meta={meta(12)} />
+    <Slide meta={meta(13)} />
   </Deck>
 </Base>
