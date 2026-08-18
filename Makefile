@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup test lint format format-check ci train pipeline serve feast-materialize monitor monitor-drift presentation-metrics docker-build docker-run
+.PHONY: help setup test lint format format-check ci train pipeline serve feast-materialize monitor monitor-drift presentation-metrics present docker-build docker-run
 
 help: ## Lista os targets disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -50,6 +50,14 @@ monitor-drift: ## Idem com drift simulado (demonstra detecção; gate falha de p
 
 presentation-metrics: ## Exporta métricas do @production para o site (presentation/src/data/metrics.json)
 	uv run python -m churn.reporting
+
+present: ## Sobe API (:8000) + site de apresentação (:4321) juntos; Ctrl-C encerra os dois
+	@cd presentation && { [ -d node_modules ] || npm install; }
+	@echo "→ API  http://localhost:8000    → Site  http://localhost:4321    (Ctrl-C encerra os dois)"
+	@trap 'kill 0 2>/dev/null; fuser -k 8000/tcp 4321/tcp 2>/dev/null; exit 0' INT TERM; \
+		uv run uvicorn churn.serving.api:app --host 0.0.0.0 --port 8000 & \
+		( cd presentation && npm run dev ) & \
+		wait
 
 docker-build: ## Constrói a imagem Docker da API
 	docker build -f docker/Dockerfile -t churn-api .
