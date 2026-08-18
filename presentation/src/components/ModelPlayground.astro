@@ -1,0 +1,58 @@
+---
+import RetentionGauge from "./RetentionGauge.astro";
+import fallback from "../data/presets_fallback.json";
+const presets = fallback.presets;
+const first = presets[0];
+const SLIDERS: { key: string; min: number; max: number; step: number }[] = [
+  { key: "Age", min: 18, max: 75, step: 1 },
+  { key: "Balance", min: 0, max: 250000, step: 1000 },
+  { key: "NumOfProducts", min: 1, max: 4, step: 1 },
+  { key: "Satisfaction Score", min: 1, max: 5, step: 1 },
+];
+---
+
+<div id="playground" data-presets={JSON.stringify(presets)} class="text-left">
+  <div class="mb-6 flex flex-wrap gap-2">
+    {presets.map((p) => (
+      <button
+        data-preset={p.id}
+        class="rounded-full border px-4 py-2 text-sm font-medium hover:bg-black/5"
+      >
+        {p.label}
+      </button>
+    ))}
+  </div>
+
+  <div class="grid gap-8 md:grid-cols-2">
+    <div class="space-y-4">
+      {SLIDERS.map((s) => (
+        <label class="block">
+          <span class="text-sm text-[var(--muted)]">{s.key}</span>
+          <input
+            type="range"
+            data-slider={s.key}
+            min={s.min}
+            max={s.max}
+            step={s.step}
+            value={String(first.request[s.key as keyof typeof first.request])}
+            class="w-full"
+          />
+        </label>
+      ))}
+    </div>
+
+    <div class="flex flex-col items-center justify-center">
+      <RetentionGauge id="pg-gauge" score={0} />
+      <p class="mt-4 text-sm">
+        Previsão: <strong id="pg-pred">—</strong> · churn <strong id="pg-prob">—</strong>
+      </p>
+      <p id="pg-seal" hidden class="mt-2 rounded bg-amber-100 px-3 py-1 text-xs text-amber-800">
+        resposta pré-gravada (API offline)
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import "../scripts/playground.ts";
+</script>
