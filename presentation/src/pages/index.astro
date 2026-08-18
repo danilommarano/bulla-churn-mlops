@@ -11,6 +11,9 @@ import ConfusionMatrix from "../components/ConfusionMatrix.astro";
 import Timeline from "../components/Timeline.astro";
 import metrics from "../data/metrics.json";
 import { SLIDES } from "../data/slides";
+import { Image } from "astro:assets";
+import mlflowRuns from "../assets/mlflow-runs.png";
+import evidentlyDrift from "../assets/evidently-drift.png";
 
 const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
 ---
@@ -48,8 +51,12 @@ const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
           <p class="mt-2 text-sm text-[var(--muted)]">accuracy 0.23 · recall 0.99 = "prevê que todos saem". Gatilho de re-treino.</p>
         </div>
       </div>
+      <Image src={evidentlyDrift} alt="Relatório de drift do Evidently" class="mx-auto mt-6 max-h-64 w-auto rounded-lg border" />
     </Slide>
-    <Slide meta={meta(10)}><Timeline /></Slide>
+    <Slide meta={meta(10)}>
+      <Timeline />
+      <Image src={mlflowRuns} alt="Runs registradas no MLflow" class="mx-auto mt-6 max-h-64 w-auto rounded-lg border" />
+    </Slide>
     <Slide meta={meta(11)} />
     <Slide meta={meta(12)} />
   </Deck>
