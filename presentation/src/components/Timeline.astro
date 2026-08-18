@@ -1,0 +1,17 @@
+---
+import { TIMELINE } from "../data/timeline";
+---
+
+<ol class="mx-auto max-w-2xl space-y-3 text-left">
+  {TIMELINE.map((m) => (
+    <li class="flex gap-4 rounded-lg px-4 py-2 hover:bg-black/5">
+      <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--accent)] text-sm font-semibold text-white">
+        {m.marco}
+      </span>
+      <span>
+        <strong>{m.title}</strong>
+        <span class="block text-sm text-[var(--muted)]">{m.detail}</span>
+      </span>
+    </li>
+  ))}
+</ol>

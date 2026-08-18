@@ -8,6 +8,7 @@ import Mermaid from "../components/Mermaid.astro";
 import ModelPlayground from "../components/ModelPlayground.astro";
 import MetricCard from "../components/MetricCard.astro";
 import ConfusionMatrix from "../components/ConfusionMatrix.astro";
+import Timeline from "../components/Timeline.astro";
 import metrics from "../data/metrics.json";
 import { SLIDES } from "../data/slides";
 
@@ -34,8 +35,21 @@ const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
         <ConfusionMatrix />
       </div>
     </Slide>
-    <Slide meta={meta(9)} />
-    <Slide meta={meta(10)} />
+    <Slide meta={meta(9)}>
+      <div class="grid gap-6 text-left md:grid-cols-2">
+        <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-6">
+          <p class="text-sm font-semibold text-emerald-700">make monitor — holdout saudável</p>
+          <p class="mt-2 font-mono text-sm">[PASS] drift_share=0.000 · drifted_columns=0 · exit 0</p>
+          <p class="mt-2 text-sm text-[var(--muted)]">accuracy 0.67 · roc_auc 0.76 · o gate deixa passar.</p>
+        </div>
+        <div class="rounded-xl border border-red-200 bg-red-50 p-6">
+          <p class="text-sm font-semibold text-red-700">make monitor-drift — drift simulado</p>
+          <p class="mt-2 font-mono text-sm">[ALERT] drift_share=0.462 · drifted_columns=6 · exit 2</p>
+          <p class="mt-2 text-sm text-[var(--muted)]">accuracy 0.23 · recall 0.99 = "prevê que todos saem". Gatilho de re-treino.</p>
+        </div>
+      </div>
+    </Slide>
+    <Slide meta={meta(10)}><Timeline /></Slide>
     <Slide meta={meta(11)} />
     <Slide meta={meta(12)} />
   </Deck>
