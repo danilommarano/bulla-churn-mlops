@@ -6,6 +6,7 @@ from contextlib import asynccontextmanager
 import mlflow
 import pandas as pd
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 from churn.config import Settings, settings
 from churn.feature_store.store import FeatureStoreUnavailable, get_geography_churn_rate
@@ -30,6 +31,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Churn scoring API", lifespan=lifespan)
+
+# Libera o site de apresentação (Astro em dev) a consumir /predict ao vivo.
+# Origens locais fixas — não é uma API pública; o site apresenta-se da própria máquina.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4321", "http://localhost:3000"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def get_model(request: Request):

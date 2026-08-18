@@ -119,6 +119,16 @@ def test_predict_requires_a_loaded_model():
     assert r.status_code == 503
 
 
+def test_predict_sends_cors_header_for_local_astro_origin(client):
+    r = client.post(
+        "/predict",
+        json=[_VALID],
+        headers={"Origin": "http://localhost:4321"},
+    )
+    assert r.status_code == 200
+    assert r.headers["access-control-allow-origin"] == "http://localhost:4321"
+
+
 def test_load_production_model_round_trips(tmp_path):
     from churn.config import Settings
     from churn.training.train import train
