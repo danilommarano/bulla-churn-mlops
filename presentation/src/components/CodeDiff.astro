@@ -1,0 +1,53 @@
+---
+import { Code } from "astro-expressive-code/components";
+import { BUGS } from "../data/bugs";
+---
+
+<div class="codediff text-left">
+  <div class="mb-4 flex items-center justify-between">
+    <span id="cd-counter" class="text-sm font-medium text-[var(--muted)]">1 / 10</span>
+    <div class="flex gap-2">
+      <button id="cd-prev" class="rounded-md border px-3 py-1 text-sm">← Anterior</button>
+      <button id="cd-next" class="rounded-md border px-3 py-1 text-sm">Próximo →</button>
+    </div>
+  </div>
+
+  {BUGS.map((bug, i) => (
+    <div class="cd-item" data-index={i} hidden={i !== 0}>
+      <h3 class="mb-1 text-xl font-semibold">
+        Bug #{bug.n} — {bug.title}
+      </h3>
+      <p class="mb-1 text-sm text-red-600">Problema: {bug.problem}</p>
+      <p class="mb-4 text-sm text-emerald-600">Correção: {bug.fix}</p>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div>
+          <p class="mb-1 text-xs uppercase tracking-widest text-[var(--muted)]">Antes</p>
+          <Code code={bug.before} lang={bug.lang} meta={`{${bug.badLine}}`} />
+        </div>
+        <div>
+          <p class="mb-1 text-xs uppercase tracking-widest text-[var(--muted)]">Depois</p>
+          <Code code={bug.after} lang={bug.lang} meta={`{${bug.goodLine}}`} />
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
+<script>
+  function initCodeDiff() {
+    const items = Array.from(document.querySelectorAll<HTMLElement>(".cd-item"));
+    if (items.length === 0) return;
+    const counter = document.getElementById("cd-counter");
+    let i = 0;
+    function show(n: number) {
+      i = (n + items.length) % items.length;
+      items.forEach((el, k) => (el.hidden = k !== i));
+      if (counter) counter.textContent = `${i + 1} / ${items.length}`;
+    }
+    document.getElementById("cd-prev")?.addEventListener("click", () => show(i - 1));
+    document.getElementById("cd-next")?.addEventListener("click", () => show(i + 1));
+    show(0);
+  }
+  if (document.readyState !== "loading") initCodeDiff();
+  else document.addEventListener("DOMContentLoaded", initCodeDiff);
+</script>
