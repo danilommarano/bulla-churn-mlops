@@ -40,7 +40,7 @@ function initPlayground() {
     const req = { ...current.request };
     for (const key of SLIDERS) {
       const el = document.querySelector<HTMLInputElement>(`[data-slider="${key}"]`);
-      if (el) req[key] = key === "Balance" ? Number(el.value) : Number(el.value);
+      if (el) req[key] = Number(el.value);
     }
     return req;
   }
