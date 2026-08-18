@@ -1,0 +1,17 @@
+---
+import { VERTEX_MAP } from "../data/vertex-map";
+---
+
+<div class="vmap mx-auto max-w-3xl text-left">
+  {VERTEX_MAP.map((p) => (
+    <a
+      href={p.slide ? `#slide-${p.slide}` : "#"}
+      class="vmap-row grid grid-cols-[1fr_auto_1fr] items-center gap-3 rounded-lg px-4 py-3 transition hover:bg-black/5"
+    >
+      <span class="font-medium">{p.vertex}</span>
+      <span class="text-[var(--muted)]">→</span>
+      <span class="font-semibold text-[var(--accent)]">{p.oss}</span>
+      <span class="col-span-3 text-sm text-[var(--muted)]">{p.role}</span>
+    </a>
+  ))}
+</div>
