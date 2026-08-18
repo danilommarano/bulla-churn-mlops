@@ -39,3 +39,8 @@ feature_repo/
 
 # KFP local pipeline run artifacts (generated)
 local_outputs/
+
+# Site de apresentação (Astro) — artefatos gerados
+presentation/node_modules/
+presentation/dist/
+presentation/.astro/

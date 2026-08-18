@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #1a1a1a;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --bg: #ffffff;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: var(--ink);
+  background: var(--bg);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
