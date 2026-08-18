@@ -1,0 +1,29 @@
+---
+import type { SlideMeta } from "../data/slides";
+interface Props {
+  meta: SlideMeta;
+}
+const { meta } = Astro.props;
+---
+
+<section
+  id={`slide-${meta.id}`}
+  class="slide relative flex min-h-screen w-full snap-start flex-col items-center justify-center px-8 py-16 text-center"
+  data-track5={meta.track5 ? "1" : "0"}
+>
+  {meta.kicker && (
+    <p class="mb-4 text-sm font-medium uppercase tracking-widest text-[var(--muted)]">
+      {meta.kicker}
+    </p>
+  )}
+  <h2 class="max-w-4xl text-4xl font-semibold tracking-tight sm:text-5xl">
+    {meta.title}
+  </h2>
+  {meta.subtitle && (
+    <p class="mt-5 max-w-2xl text-lg text-[var(--muted)]">{meta.subtitle}</p>
+  )}
+  <div class="mt-10 w-full max-w-5xl">
+    <slot />
+  </div>
+  <template data-notes set:html={meta.notes} />
+</section>
