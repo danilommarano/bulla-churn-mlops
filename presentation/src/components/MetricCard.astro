@@ -1,0 +1,14 @@
+---
+interface Props {
+  label: string;
+  value: string;
+  note?: string;
+}
+const { label, value, note } = Astro.props;
+---
+
+<div class="rounded-xl border border-black/10 px-6 py-5 text-left">
+  <p class="text-sm uppercase tracking-widest text-[var(--muted)]">{label}</p>
+  <p class="mt-1 text-3xl font-semibold">{value}</p>
+  {note && <p class="mt-1 text-sm text-[var(--muted)]">{note}</p>}
+</div>

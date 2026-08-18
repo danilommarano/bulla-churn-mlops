@@ -6,6 +6,9 @@ import CodeDiff from "../components/CodeDiff.astro";
 import VertexOssMap from "../components/VertexOssMap.astro";
 import Mermaid from "../components/Mermaid.astro";
 import ModelPlayground from "../components/ModelPlayground.astro";
+import MetricCard from "../components/MetricCard.astro";
+import ConfusionMatrix from "../components/ConfusionMatrix.astro";
+import metrics from "../data/metrics.json";
 import { SLIDES } from "../data/slides";
 
 const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
@@ -20,7 +23,17 @@ const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
     <Slide meta={meta(5)}><CodeDiff /></Slide>
     <Slide meta={meta(6)}><Mermaid /></Slide>
     <Slide meta={meta(7)}><ModelPlayground /></Slide>
-    <Slide meta={meta(8)} />
+    <Slide meta={meta(8)}>
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <MetricCard label="ROC AUC" value={metrics.roc_auc.toFixed(3)} note="separa bem" />
+        <MetricCard label="Recall" value={metrics.recall.toFixed(3)} note="o que importa" />
+        <MetricCard label="Precision" value={metrics.precision.toFixed(3)} />
+        <MetricCard label="Accuracy" value={metrics.accuracy.toFixed(3)} note="engana" />
+      </div>
+      <div class="mt-8">
+        <ConfusionMatrix />
+      </div>
+    </Slide>
     <Slide meta={meta(9)} />
     <Slide meta={meta(10)} />
     <Slide meta={meta(11)} />
