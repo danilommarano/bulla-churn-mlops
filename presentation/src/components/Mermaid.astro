@@ -1,0 +1,29 @@
+---
+interface Props {
+  chart?: string;
+}
+const defaultChart = `flowchart LR
+  A[CSV validado<br/>Pandera] --> B[Split<br/>stratify+seed]
+  B --> C[Feast<br/>feature sem leakage]
+  C --> D[Pipeline sklearn<br/>fit no treino]
+  D --> E[MLflow<br/>tracking + registry]
+  E -->|gate roc_auc>=0.70| F[@production]
+  F --> G[FastAPI /predict<br/>score 0-10]
+  G --> H[Evidently<br/>drift + quality gate]
+  H -->|exit != 0| B`;
+const { chart = defaultChart } = Astro.props;
+---
+
+<div class="mermaid-wrap flex justify-center">
+  <pre class="mermaid" set:html={chart} />
+</div>
+
+<script>
+  import mermaid from "mermaid";
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "neutral",
+    flowchart: { curve: reduce ? "linear" : "basis" },
+  });
+</script>

@@ -4,6 +4,7 @@ import Deck from "../components/Deck.astro";
 import Slide from "../components/Slide.astro";
 import CodeDiff from "../components/CodeDiff.astro";
 import VertexOssMap from "../components/VertexOssMap.astro";
+import Mermaid from "../components/Mermaid.astro";
 import { SLIDES } from "../data/slides";
 
 const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
@@ -16,7 +17,7 @@ const meta = (id: number) => SLIDES.find((s) => s.id === id)!;
     <Slide meta={meta(3)}><VertexOssMap /></Slide>
     <Slide meta={meta(4)} />
     <Slide meta={meta(5)}><CodeDiff /></Slide>
-    <Slide meta={meta(6)} />
+    <Slide meta={meta(6)}><Mermaid /></Slide>
     <Slide meta={meta(7)} />
     <Slide meta={meta(8)} />
     <Slide meta={meta(9)} />
