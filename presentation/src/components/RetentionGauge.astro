@@ -1,0 +1,48 @@
+---
+interface Props {
+  score?: number;
+  id?: string;
+}
+const { score = 0, id = "gauge" } = Astro.props;
+// semicírculo: raio 90, comprimento do arco = π*r ≈ 282.7
+const ARC = 282.74;
+const initialOffset = ARC * (1 - score / 10);
+---
+
+<div class="gauge inline-flex flex-col items-center" data-arc={ARC}>
+  <svg width="220" height="130" viewBox="0 0 220 130">
+    <path
+      d="M 20 120 A 90 90 0 0 1 200 120"
+      fill="none"
+      stroke="#e5e7eb"
+      stroke-width="16"
+      stroke-linecap="round"
+    />
+    <path
+      id={`${id}-arc`}
+      d="M 20 120 A 90 90 0 0 1 200 120"
+      fill="none"
+      stroke="var(--accent)"
+      stroke-width="16"
+      stroke-linecap="round"
+      stroke-dasharray={ARC}
+      stroke-dashoffset={initialOffset}
+      class="gauge-arc"
+    />
+  </svg>
+  <div class="-mt-8 text-center">
+    <span id={`${id}-value`} class="text-4xl font-semibold">{score}</span>
+    <span class="text-[var(--muted)]">/10</span>
+  </div>
+</div>
+
+<style>
+  .gauge-arc {
+    transition: stroke-dashoffset 700ms ease;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gauge-arc {
+      transition: none;
+    }
+  }
+</style>
