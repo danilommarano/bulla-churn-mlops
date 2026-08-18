@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help setup test lint format format-check ci train pipeline serve feast-materialize monitor monitor-drift docker-build docker-run
+.PHONY: help setup test lint format format-check ci train pipeline serve feast-materialize monitor monitor-drift presentation-metrics docker-build docker-run
 
 help: ## Lista os targets disponíveis
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -47,6 +47,9 @@ monitor: ## Gera o relatório de drift/qualidade (holdout saudável; gate deve p
 
 monitor-drift: ## Idem com drift simulado (demonstra detecção; gate falha de propósito)
 	uv run python -m churn.monitoring --simulate-drift
+
+presentation-metrics: ## Exporta métricas do @production para o site (presentation/src/data/metrics.json)
+	uv run python -m churn.reporting
 
 docker-build: ## Constrói a imagem Docker da API
 	docker build -f docker/Dockerfile -t churn-api .
