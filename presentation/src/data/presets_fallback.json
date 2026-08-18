@@ -1,0 +1,77 @@
+{
+  "_note": "Respostas REAIS pré-gravadas do /predict (@production). Fallback offline do ModelPlayground.",
+  "presets": [
+    {
+      "id": "fiel",
+      "label": "Cliente fiel",
+      "desc": "Alta satisfação, 2 produtos, saldo e pontos altos.",
+      "request": {
+        "CreditScore": 810,
+        "Age": 30,
+        "Balance": 120000.0,
+        "EstimatedSalary": 85000.0,
+        "Tenure": 9,
+        "NumOfProducts": 2,
+        "HasCrCard": 1,
+        "Satisfaction Score": 5,
+        "Point Earned": 950,
+        "Geography": "France",
+        "Gender": "Female",
+        "Card Type": "PLATINUM"
+      },
+      "response": {
+        "turnover_pred": 0,
+        "prob_churn": 0.2334118693588696,
+        "score_retencao": 8
+      }
+    },
+    {
+      "id": "borderline",
+      "label": "Cliente borderline",
+      "desc": "No muro da decisão — score 5, poderia ir para qualquer lado.",
+      "request": {
+        "CreditScore": 680,
+        "Age": 38,
+        "Balance": 90000.0,
+        "EstimatedSalary": 95000.0,
+        "Tenure": 5,
+        "NumOfProducts": 1,
+        "HasCrCard": 1,
+        "Satisfaction Score": 3,
+        "Point Earned": 500,
+        "Geography": "Spain",
+        "Gender": "Female",
+        "Card Type": "GOLD"
+      },
+      "response": {
+        "turnover_pred": 1,
+        "prob_churn": 0.5488142598643836,
+        "score_retencao": 5
+      }
+    },
+    {
+      "id": "risco",
+      "label": "Cliente em risco",
+      "desc": "Mais velho, 1 produto, saldo zero, baixa satisfação.",
+      "request": {
+        "CreditScore": 550,
+        "Age": 54,
+        "Balance": 0.0,
+        "EstimatedSalary": 60000.0,
+        "Tenure": 1,
+        "NumOfProducts": 1,
+        "HasCrCard": 0,
+        "Satisfaction Score": 2,
+        "Point Earned": 200,
+        "Geography": "Germany",
+        "Gender": "Male",
+        "Card Type": "SILVER"
+      },
+      "response": {
+        "turnover_pred": 1,
+        "prob_churn": 0.7299181772409702,
+        "score_retencao": 3
+      }
+    }
+  ]
+}
