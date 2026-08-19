@@ -33,6 +33,10 @@ body.deck-editing [data-edit] {
   cursor: text;
   border-radius: 2px;
 }
+body.deck-editing [data-edit].is-selected {
+  outline-style: solid;
+  outline-width: 2px;
+}
 
 /* Deck: um slide por vez, com crossfade suave (sem scroll entre slides). */
 .deck {

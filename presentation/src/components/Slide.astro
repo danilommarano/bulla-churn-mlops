@@ -32,7 +32,7 @@ const { meta, active = false } = Astro.props;
       {meta.subtitle}
     </p>
   )}
-  <div class="mt-10 w-full max-w-5xl">
+  <div class="mt-10 w-full max-w-5xl" data-blocks>
     <slot />
   </div>
   <template data-notes set:html={meta.notes} />

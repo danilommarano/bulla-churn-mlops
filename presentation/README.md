@@ -22,7 +22,12 @@ Aperte `E` no deck para abrir o modo edição (painel no canto):
 
 - **Texto** — clique em qualquer título/subtítulo/kicker (contorno tracejado) e digite.
 - **Cor e fonte** — o painel muda acento, fundo, cor do texto e fonte (corpo/títulos) ao vivo.
-- **Ordem** — mova o slide atual com ◀ / ▶.
+- **Selecionar** — clique num texto/bloco para selecioná-lo (contorno sólido); os controles abaixo agem sobre a seleção:
+  - **Alinhar texto** — ⬅ / ⬛ / ➡ (esquerda / centro / direita).
+  - **Tamanho** — A− / A+ por elemento.
+  - **Bloco** — ↑ / ↓ move o componente selecionado dentro do slide.
+- **Slide** — Topo / Centro (alinhamento vertical do conteúdo do slide atual).
+- **Ordem** — ◀ / ▶ move o slide atual na sequência.
 - **Persistência** — as edições ficam salvas no navegador (localStorage) na hora.
 
 Para tornar as edições **permanentes e versionadas**, clique em **Exportar `overrides.json`**
