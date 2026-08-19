@@ -6,6 +6,8 @@
   --muted: #6f6d64; /* cinza quente */
   --accent: #c15f3c; /* argila/coral */
   --panel: #faf9f5; /* cartão suave sobre o creme */
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: ui-serif, Georgia, Cambria, "Times New Roman", serif;
 }
 
 html {
@@ -15,8 +17,21 @@ html {
 body {
   color: var(--ink);
   background: var(--bg);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Títulos usam a fonte de display (editável no modo edição via --font-display). */
+.slide h2 {
+  font-family: var(--font-display);
+}
+
+/* Modo edição: destaca as áreas de texto editáveis. */
+body.deck-editing [data-edit] {
+  outline: 1px dashed var(--accent);
+  outline-offset: 4px;
+  cursor: text;
+  border-radius: 2px;
 }
 
 /* Deck: um slide por vez, com crossfade suave (sem scroll entre slides). */

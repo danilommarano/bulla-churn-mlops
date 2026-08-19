@@ -14,7 +14,24 @@ Ou só o site:
     npm install
     npm run dev      # http://localhost:4321
 
-Atalhos no deck: `←/→/espaço` navegam · `S` speaker notes · `B` blackout · `D` alterna deck↔dashboard.
+Atalhos no deck: `←/→/espaço` navegam · `S` speaker notes · `B` blackout · `D` alterna deck↔dashboard · `E` modo edição.
+
+## Editar a apresentação (modo edição — tecla `E`)
+
+Aperte `E` no deck para abrir o modo edição (painel no canto):
+
+- **Texto** — clique em qualquer título/subtítulo/kicker (contorno tracejado) e digite.
+- **Cor e fonte** — o painel muda acento, fundo, cor do texto e fonte (corpo/títulos) ao vivo.
+- **Ordem** — mova o slide atual com ◀ / ▶.
+- **Persistência** — as edições ficam salvas no navegador (localStorage) na hora.
+
+Para tornar as edições **permanentes e versionadas**, clique em **Exportar `overrides.json`**
+e substitua `src/data/overrides.json` pelo arquivo baixado. O deck carrega esse arquivo
+(por baixo do localStorage) em toda visita — então vira a fonte da verdade no repo.
+**Resetar edições** limpa o localStorage e volta ao `overrides.json` versionado.
+
+> Limite: o modo edição é para uso local. Sem exportar, as edições vivem só naquele
+> navegador. É de propósito enxuto — não é um editor visual "arrasta qualquer coisa".
 
 ## Interação ao vivo (opcional)
 

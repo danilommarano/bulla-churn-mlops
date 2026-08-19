@@ -39,15 +39,15 @@ const modelFacts = [
     <Slide meta={meta(2)} />
     <Slide meta={meta(3)}>
       <div class="mx-auto grid max-w-3xl gap-4 text-left sm:grid-cols-2">
-        {modelFacts.map((f) => (
+        {modelFacts.map((f, i) => (
           <div class="rounded-xl border border-black/10 bg-[var(--panel)] p-5">
-            <p class="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">{f.k}</p>
-            <p class="mt-1 text-lg font-medium">{f.v}</p>
-            <p class="mt-1 text-sm text-[var(--muted)]">{f.d}</p>
+            <p data-edit={`3.model.${i}.k`} class="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">{f.k}</p>
+            <p data-edit={`3.model.${i}.v`} class="mt-1 text-lg font-medium">{f.v}</p>
+            <p data-edit={`3.model.${i}.d`} class="mt-1 text-sm text-[var(--muted)]">{f.d}</p>
           </div>
         ))}
       </div>
-      <p class="mt-6 text-sm text-[var(--muted)]">
+      <p data-edit="3.model.note" class="mt-6 text-sm text-[var(--muted)]">
         Um único <span class="font-medium text-[var(--ink)]">Pipeline sklearn</span> encapsula
         pré-processo + modelo: o mesmo objeto treina, versiona e prediz — sem re-fit na inferência.
       </p>
